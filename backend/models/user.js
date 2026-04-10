@@ -9,6 +9,7 @@ const UserSchema = new Schema(
     role: { type: String, enum: ["user", "admin"], default: user },
     skills: [{ type: String }],
     bio: { type: String },
+    refresh_token: { type: String, default: null },
   },
   { timestamps: true }
 );
