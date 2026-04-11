@@ -3,10 +3,10 @@ const Schema = mongoose.Schema;
 
 const projectSchema = new Schema(
   {
-    name: { type: String, required: true },
+    project_name: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     owner: { type: String, ref: "User", required: true },
-    team: [{ type: String, ref: "User" }],
+    member: [{ type: String, ref: "User" }],
     isPublic: { type: Boolean, default: true },
     techStack: [{ type: String }],
   },
