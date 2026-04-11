@@ -6,7 +6,7 @@ const projectSchema = new Schema(
     project_name: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     owner: { type: String, ref: "User", required: true },
-    member: [{ type: String, ref: "User" }],
+    member: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isPublic: { type: Boolean, default: true },
     techStack: [{ type: String }],
   },

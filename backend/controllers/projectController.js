@@ -1,20 +1,29 @@
 const Project = require("../models/project");
+const Team = require("../models/team");
 const { validationResult } = require("express-validator");
 
 exports.get_project = async (req, res) => {
-  const all_project = Project.find({
-    $or: [{ owner: req.user._id }, { team: req.user._id }],
-  })
-    .populate("owner", "name email")
-    .populate("team", "name email")
-    .sort(-1);
+  try {
+    const all_project = Project.find({
+      $or: [{ owner: req.user._id }, { team: req.user._id }],
+    })
+      .populate("owner", "name email")
+      .populate("team", "name email")
+      .sort(-1);
 
-  return res.status(201).json({
-    success: true,
-    message: "fetched all projects",
-    access_token,
-    total_project: all_project,
-  });
+    return res.status(201).json({
+      success: true,
+      message: "fetched all projects",
+      access_token,
+      total_project: all_project,
+    });
+  } catch (error) {
+    console.error("error", error);
+    return res.status(500).json({
+      success: false,
+      message: error,
+    });
+  }
 };
 exports.get_single_project = async (req, res) => {
   try {
@@ -82,13 +91,21 @@ exports.create_project = async (req, res) => {
 };
 
 exports.add_member = async (req, res) => {
-  const { project_id } = req.param;
-  const { user_id } = req.body;
-  await project.findByIdAndUpdate(
-    project_id,
-    {
-      $addToSet: { members: user_id },
-    },
-    { new: true }
-  );
+  try {
+    const { project_id } = req.param;
+    const { user_id } = req.body;
+    await project.findByIdAndUpdate(
+      project_id,
+      {
+        $addToSet: { members: user_id },
+      },
+      { new: true }
+    );
+  } catch (error) {
+    console.error("error", error);
+    return res.status(500).json({
+      success: false,
+      message: error,
+    });
+  }
 };
