@@ -1,11 +1,12 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
-const User = require("..model/user");
+const User = require("../model/user");
+const jwt = require("jsonwebtoken");
 
 exports.sign_up = async (req, res) => {
   const error = validationResult(req);
 
-  if (!error.isEmpty) {
+  if (!error.isEmpty()) {
     return res.status(404).json({
       success: false,
       errors: error.array(),
@@ -18,7 +19,7 @@ exports.sign_up = async (req, res) => {
       $or: [{ email }, { username }],
     });
 
-    if (!existing_user) {
+    if (existing_user) {
       const already_exist =
         existing_user.email === email ? "email" : "username";
       return res.status(409).json({
@@ -88,7 +89,7 @@ exports.sign_up = async (req, res) => {
 exports.login = async (req, res) => {
   const error = validationResult(req);
 
-  if (!error.isEmpty) {
+  if (!error.isEmpty()) {
     return res.status(400).json({
       success: false,
       errors: error.array(),
