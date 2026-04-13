@@ -3,24 +3,22 @@ const Task = require("../models/task");
 
 exports.assign_task = async (req, res) => {
   const error = validationResult(req);
-  if (!error.isEmpty) {
+  if (!error.isEmpty()) {
     return res.status(500).json({
       success: false,
-      errors: error.array,
+      errors: error.array(),
     });
   }
 
   try {
-    const task_details = req.body;
     const task = new Task({
-      task_details,
+      ...req.body,
     });
     await task.save();
 
     return res.status(201).json({
       success: true,
       message: "task assigned",
-      access_token,
     });
   } catch (error) {
     console.error("error", error);
@@ -32,7 +30,7 @@ exports.assign_task = async (req, res) => {
 };
 
 exports.update_task_status = async (req, res) => {
-  const { project_id } = req.param;
+  const { project_id } = req.params;
   const { data_to_update, update_to_id } = req.body;
 
   try {
@@ -48,7 +46,7 @@ exports.update_task_status = async (req, res) => {
       const task = await Task.findByIdAndUpdate(
         project_id,
         {
-          $addToSet: { status: update_to },
+          $set: { status: update_to },
         },
         { new: true }
       );
@@ -67,14 +65,13 @@ exports.update_task_status = async (req, res) => {
       const task = await Task.findByIdAndUpdate(
         project_id,
         {
-          $addToSet: { priority: update_to },
+          $set: { priority: update_to },
         },
         { new: true }
       );
-      await task.save();
     }
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "task updated",
     });
@@ -83,6 +80,53 @@ exports.update_task_status = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error,
+    });
+  }
+};
+
+exports.submit_task = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      errors: errors.array(),
+    });
+  }
+
+  try {
+    const { taskId } = req.body;
+    const file = req.file?.path; // from multer
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const task = await Task.findByIdAndUpdate(
+      taskId,
+      { $set: { proof: file, status: "under_review" } }, // set to under_review when submitted
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Task submitted successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Submit task error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while submitting task",
     });
   }
 };

@@ -15,6 +15,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", require("./routes/auth_routes"));
 app.use("/api/project", require("./routes/project_routes"));
+app.use("api/tasks", require("./routes/task_routes"));
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {

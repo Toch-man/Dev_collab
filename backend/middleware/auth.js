@@ -31,8 +31,15 @@ exports.verify_token = async (req, res, next) => {
   }
 };
 
-exports.is_admin = async (req, res, next) => {
-  if (req.user.role == "admin") {
+exports.is_owner = async (req, res, next) => {
+  const { project } = req.params;
+  const is_owner = await Project.findOne(user);
+  let is_project_owner;
+
+  if (project.owner == req.user) {
+    is_project_owner = true;
+  }
+  if (is_owner && true) {
     return next();
   }
 
