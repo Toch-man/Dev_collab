@@ -3,12 +3,13 @@ const Schema = mongoose.Schema;
 
 const notificationSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    type: { type: String, enum: ["invite", "task", "message"] },
+    sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    receiver: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    type: { type: String, enum: ["invite", "task", "request_to_join"] },
     message: { type: String },
     isRead: { type: Boolean, default: false },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
-module.export = mongoose.model("Notification", notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema);

@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const Project = require("../models/project");
+const Task = require("../models/task");
 
 exports.verify_token = async (req, res, next) => {
   const auth_header = req.headers.authorization;
@@ -31,20 +33,75 @@ exports.verify_token = async (req, res, next) => {
   }
 };
 
-exports.is_owner = async (req, res, next) => {
-  const { project } = req.params;
-  const is_owner = await Project.findOne(user);
-  let is_project_owner;
+exports.is_task_owner = async (req, res, next) => {
+  try {
+    const { task_id } = req.params;
 
-  if (project.owner == req.user) {
-    is_project_owner = true;
+    const task = await Task.findById(task_id).populate();
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    if (!task.assignedTo.toString() == req.user.userId.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: "no authorised",
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("error", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
-  if (is_owner && true) {
-    return next();
+};
+
+exports.is_project_owner = async (req, res, next) => {
+  try {
+    const { project_id } = req.params;
+    const project = await Project.findById(project_id);
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "project not found",
+      });
+    }
+
+    if (!project.owner.toString() == req.user.userId.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: "not authorised",
+      });
+    }
+  } catch (error) {
+    console.error("error", error.message);
+    return;
   }
 
-  return res.status(401).json({
-    success: false,
-    message: "only admin can do this",
-  });
+  // task.project is already an ObjectId so findById accepts it directly
+  const project = await Project.findById(task.project);
+  if (!project) {
+    return res.status(404).json({
+      success: false,
+      message: "Project not found",
+    });
+  }
+
+  // project.owner is an ObjectId → "6gjhsbdyusdsb"
+  // req.user.userId is a string  → "6gjhsbdyusdsb"
+  // .toString() on both so they compare as same type
+  if (project.owner.toString() !== req.user.userId.toString()) {
+    return res.status(403).json({
+      success: false,
+      message: "Only the project owner can do this",
+    });
+  }
+
+  next();
 };

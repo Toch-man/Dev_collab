@@ -12,3 +12,5 @@ router.get(
 router.post("/create_project", verify_token, project_controller.create_project);
 router.post("/send_invite", verify_token, project_controller.send_invite);
 router.post("/accept_invite", verify_token, project_controller.accept_invite);
+
+module.exports = router;

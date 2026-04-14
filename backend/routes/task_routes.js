@@ -6,7 +6,7 @@ const router = require("express").Router();
 router.post(
   "/assign_task",
   verify_token,
-  is_task_owner,
+  is_project_owner,
   task_controller.assign_task
 );
 
@@ -17,4 +17,11 @@ router.post(
   task_controller.update_task_status
 );
 
-router.post("/submit_task", verify_token, task_controller.submit_task);
+router.post(
+  "/submit_task/:project_id",
+  verify_token,
+  is_task_owner,
+  task_controller.submit_task
+);
+
+module.exports = router;

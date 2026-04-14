@@ -94,7 +94,7 @@ exports.submit_task = async (req, res) => {
   }
 
   try {
-    const { taskId } = req.body;
+    const { taskId } = req.param;
     const file = req.file?.path; // from multer
 
     if (!file) {
@@ -130,3 +130,5 @@ exports.submit_task = async (req, res) => {
     });
   }
 };
+
+//task that are under reviewed fetched and approved chnages to done else chnages to inprogres
