@@ -79,29 +79,9 @@ exports.is_project_owner = async (req, res, next) => {
         message: "not authorised",
       });
     }
+    next();
   } catch (error) {
     console.error("error", error.message);
     return;
   }
-
-  // task.project is already an ObjectId so findById accepts it directly
-  const project = await Project.findById(task.project);
-  if (!project) {
-    return res.status(404).json({
-      success: false,
-      message: "Project not found",
-    });
-  }
-
-  // project.owner is an ObjectId → "6gjhsbdyusdsb"
-  // req.user.userId is a string  → "6gjhsbdyusdsb"
-  // .toString() on both so they compare as same type
-  if (project.owner.toString() !== req.user.userId.toString()) {
-    return res.status(403).json({
-      success: false,
-      message: "Only the project owner can do this",
-    });
-  }
-
-  next();
 };

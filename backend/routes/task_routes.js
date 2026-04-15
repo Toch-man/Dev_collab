@@ -1,6 +1,7 @@
 const task_controller = require("../controllers/taskController");
 const { verify_token } = require("../middleware/auth");
 const { is_task_owner } = require("../middleware/auth");
+const { is_project_owner } = require("../middleware/auth");
 const router = require("express").Router();
 
 router.post(

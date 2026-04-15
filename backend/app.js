@@ -21,4 +21,12 @@ app.get("/test", (req, res) => {
   res.status(200).json({ message: "test route working" });
 });
 
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
+
 module.exports = app;

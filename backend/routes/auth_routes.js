@@ -16,7 +16,7 @@ const login_validation = [
 ];
 
 router.post("/sign_up", auth_controller.sign_up, signup_validation);
-router.post("login", auth_controller.login, login_validation);
+router.post("/login", auth_controller.login, login_validation);
 router.post("/refresh_token", auth_controller.refreshToken);
 
 module.exports = router;
