@@ -1,37 +1,34 @@
 const request = require("supertest");
-const app = require("../app"); // adjust path
+const mongoose = require("mongoose");
+const app = require("../app");
 
 describe("Auth Routes", () => {
   const testUser = {
     username: "tochukwu",
-    email: "okeakputochukwu9@.com",
+    email: "okeakputochukwu9@gmail.com",
     password: "password123",
     full_name: "okeakpu tochukwu",
     niche: "web developer",
   };
 
-  //test db
   beforeAll(async () => {
-    await connectDB(process.env.MONGO_URL);
-  });
+    await mongoose.connect(process.env.MONGO_URL);
+  }, 15000);
 
-  //clean db before each test
   beforeEach(async () => {
     const collections = mongoose.connection.collections;
-
     for (let key in collections) {
       await collections[key].deleteMany();
     }
   });
 
-  //close db after test
   afterAll(async () => {
     await mongoose.connection.close();
-  });
-  //  REGISTER
-  describe("POST /api/auth/register", () => {
+  }, 15000);
+
+  describe("POST /api/auth/sign_up", () => {
     test("should register a new user", async () => {
-      const res = await request(app).post("/api/auth/register").send(testUser);
+      const res = await request(app).post("/api/auth/sign_up").send(testUser);
 
       expect(res.statusCode).toBe(201);
       expect(res.body).toHaveProperty("token");
@@ -39,14 +36,19 @@ describe("Auth Routes", () => {
     });
 
     test("should not register with existing email", async () => {
-      const res = await request(app).post("/api/auth/register").send(testUser);
+      await request(app).post("/api/auth/sign_up").send(testUser);
+
+      const res = await request(app).post("/api/auth/sign_up").send(testUser);
 
       expect(res.statusCode).toBe(400);
     });
   });
 
-  // LOGIN
   describe("POST /api/auth/login", () => {
+    beforeEach(async () => {
+      await request(app).post("/api/auth/sign_up").send(testUser);
+    });
+
     test("should login user with correct credentials", async () => {
       const res = await request(app).post("/api/auth/login").send({
         email: testUser.email,
