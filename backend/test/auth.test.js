@@ -31,7 +31,7 @@ describe("Auth Routes", () => {
       const res = await request(app).post("/api/auth/sign_up").send(testUser);
 
       expect(res.statusCode).toBe(201);
-      expect(res.body).toHaveProperty("token");
+      expect(res.body).toHaveProperty("access_token");
       expect(res.body).toHaveProperty("user");
     });
 
@@ -40,7 +40,7 @@ describe("Auth Routes", () => {
 
       const res = await request(app).post("/api/auth/sign_up").send(testUser);
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(409);
     });
   });
 
@@ -56,7 +56,7 @@ describe("Auth Routes", () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty("token");
+      expect(res.body).toHaveProperty("access_token");
     });
 
     test("should fail with wrong password", async () => {

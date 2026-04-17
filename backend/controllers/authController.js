@@ -56,7 +56,6 @@ exports.sign_up = async (req, res) => {
     );
 
     new_user.refreshToken = refreshToken;
-    await new_user.save();
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -100,7 +99,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: "email not found",
       });
@@ -129,9 +128,9 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    user.refresh_token = refresh_token;
+    user.refreshToken = refreshToken;
     await user.save();
-    res.cookie("refreshToken", refresh_token, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -160,7 +159,7 @@ exports.login = async (req, res) => {
 };
 
 exports.refreshToken = async (req, res) => {
-  const refresh_token = req.cookies.refreshToken;
+  const refreshToken = req.cookies.refreshToken;
 
   if (!refresh_token) {
     return res.status(401).json({
@@ -170,10 +169,10 @@ exports.refreshToken = async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.userId);
 
-    if (!user || user.refresh_token !== refresh_token) {
+    if (!user || user.refreshToken !== refreshToken) {
       return res.status(403).json({
         success: false,
         message: "Invalid refresh token",

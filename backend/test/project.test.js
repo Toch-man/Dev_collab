@@ -26,13 +26,13 @@ describe("Project Routes", () => {
     }
 
     // register and login to get fresh token and userId for each test
-    await request(app).post("/api/auth/register").send(testUser);
+    await request(app).post("/api/auth/sign_up").send(testUser);
     const loginRes = await request(app).post("/api/auth/login").send({
       email: testUser.email,
       password: testUser.password,
     });
 
-    authToken = loginRes.body.token;
+    authToken = loginRes.body.access_token;
     ownerId = loginRes.body.user._id;
   });
 
@@ -59,7 +59,7 @@ describe("Project Routes", () => {
     });
   });
 
-  describe("POST /api/project/send_invite", () => {
+  describe(`POST /api/project/send_invite/:project_id`, () => {
     test("can send invite", async () => {
       const projectRes = await request(app)
         .post("/api/project/create_project")
@@ -68,7 +68,7 @@ describe("Project Routes", () => {
           project_name: "agromarket",
           description: "agricultural ecommerce platform",
           owner: ownerId,
-          member: [ownerId],
+          members: [ownerId],
           isPublic: true,
           techStack: "web developer",
         });
@@ -76,7 +76,7 @@ describe("Project Routes", () => {
       const projectId = projectRes.body.project._id;
 
       const res = await request(app)
-        .post("/api/project/send_invite")
+        .post(`/api/project/send_invite/${projectId}`)
         .set("Authorization", `Bearer ${authToken}`)
         .send({
           project_id: projectId,
@@ -84,7 +84,7 @@ describe("Project Routes", () => {
         });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty("token");
+      expect(res.body).toHaveProperty("invite");
     });
   });
 });

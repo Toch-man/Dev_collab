@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 
 exports.get_project = async (req, res) => {
   try {
-    const all_project = Project.find({
+    const all_project = await Project.find({
       $or: [{ owner: req.user._id }, { team: req.user._id }],
     })
       .populate("owner", "name email")
@@ -27,7 +27,8 @@ exports.get_project = async (req, res) => {
 };
 exports.get_single_project = async (req, res) => {
   try {
-    const project = Project.findOne({ project_name });
+    const { project_id } = req.params;
+    const project = Project.findById(project_id);
     if (!project) {
       return res.status(401).json({
         success: false,
@@ -38,7 +39,7 @@ exports.get_single_project = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "successful",
-      access_token,
+
       project: project,
     });
   } catch (error) {
@@ -53,16 +54,16 @@ exports.get_single_project = async (req, res) => {
 exports.create_project = async (req, res) => {
   const error = validationResult(req);
 
-  if (!error.isEmpty) {
+  if (!error.isEmpty()) {
     return res.status(500).json({
       success: false,
-      errors: error.array,
+      errors: error.array(),
     });
   }
   try {
     const project = await Project.create({
       ...req.body,
-      owner: req.user._id,
+      owner: req.user.userId,
     });
     await project.save();
 
@@ -83,9 +84,10 @@ exports.create_project = async (req, res) => {
 
 exports.send_invite = async (req, res) => {
   try {
-    const { project_name, receiver_id } = req.body;
+    const { receiver_id } = req.body;
+    const { project_id } = req.params;
 
-    const project = await Project.findOne({ project_name });
+    const project = await Project.findById(project_id);
     if (!project) {
       return res.status(404).json({
         success: false,
@@ -110,7 +112,7 @@ exports.send_invite = async (req, res) => {
     const type = receiver_id ? "owner_invite" : "join_request";
 
     // check if sender is already a member
-    const already_member = project.members.some(
+    const already_member = (project.members || []).some(
       (member) => member.toString() === sender.toString()
     );
     if (already_member) {
@@ -145,7 +147,7 @@ exports.send_invite = async (req, res) => {
       type,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message:
         type === "owner_invite"

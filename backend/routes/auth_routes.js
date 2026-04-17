@@ -15,8 +15,8 @@ const login_validation = [
   body("password").notEmpty(),
 ];
 
-router.post("/sign_up", auth_controller.sign_up, signup_validation);
-router.post("/login", auth_controller.login, login_validation);
+router.post("/sign_up", signup_validation, auth_controller.sign_up);
+router.post("/login", login_validation, auth_controller.login);
 router.post("/refresh_token", auth_controller.refreshToken);
 
 module.exports = router;

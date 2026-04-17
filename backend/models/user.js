@@ -10,7 +10,7 @@ const UserSchema = new Schema(
     skills: [{ type: String }],
     bio: { type: String },
     task: [{ type: Schema.Types.ObjectId, ref: "Task" }],
-    refresh_token: { type: String, default: null },
+    refreshToken: { type: String, default: null },
   },
   { timestamps: true }
 );
