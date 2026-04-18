@@ -1,4 +1,5 @@
 import Nav_bar from "./components/nav_bar";
+import Link from "next/link";
 
 const CodeIcon = () => (
   <svg
@@ -159,9 +160,12 @@ export default function Home() {
           on real projects — find your team, assign tasks, and ship.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white text-base font-semibold px-8 py-3 rounded-xl transition-colors duration-200">
-            Get started free <ArrowRight />
-          </button>
+          <Link href="/auth/login">
+            <button className="flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white text-base font-semibold px-8 py-3 rounded-xl transition-colors duration-200">
+              Get started free <ArrowRight />
+            </button>
+          </Link>
+
           <button className="flex items-center justify-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white text-base font-semibold px-8 py-3 rounded-xl transition-all duration-200">
             See how it works
           </button>
@@ -265,9 +269,11 @@ export default function Home() {
         <p className="text-green-100 text-lg mb-8 max-w-md mx-auto">
           Join thousands of developers already building on DevCollab.
         </p>
-        <button className="flex items-center justify-center gap-2 mx-auto bg-white text-green-700 hover:bg-green-50 font-bold text-base px-10 py-3 rounded-xl transition-colors duration-200">
-          Start building <ArrowRight />
-        </button>
+        <Link href="/auth/login">
+          <button className="flex items-center justify-center gap-2 mx-auto bg-white text-green-700 hover:bg-green-50 font-bold text-base px-10 py-3 rounded-xl transition-colors duration-200">
+            Start building <ArrowRight />
+          </button>
+        </Link>
       </section>
 
       {/* FOOTER */}

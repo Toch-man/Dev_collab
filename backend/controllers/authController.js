@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 
@@ -14,7 +15,7 @@ exports.sign_up = async (req, res) => {
   }
 
   try {
-    const { username, email, password, full_name, niche } = req.body;
+    const { username, email, password } = req.body;
     const existing_user = await User.findOne({
       $or: [{ email }, { username }],
     });
@@ -31,11 +32,8 @@ exports.sign_up = async (req, res) => {
     const hashed_password = await bcrypt.hash(password, 12);
 
     const new_user = new User({
-      username,
-      email,
+      ...req.body,
       password: hashed_password,
-      full_name,
-      niche,
     });
 
     await new_user.save();
@@ -68,12 +66,7 @@ exports.sign_up = async (req, res) => {
       success: true,
       message: "Account created successfully",
       access_token,
-      user: {
-        id: new_user._id,
-        username: new_user.username,
-        email: new_user.email,
-        niche: new_user.niche,
-      },
+      user: new_user,
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -122,7 +115,7 @@ exports.login = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-    const refresh_token = jwt.sign(
+    const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "7d" }
@@ -161,7 +154,7 @@ exports.login = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  if (!refresh_token) {
+  if (!refreshToken) {
     return res.status(401).json({
       success: false,
       message: "No refresh token",
@@ -199,4 +192,60 @@ exports.refreshToken = async (req, res) => {
       message: "Invalid or expired refresh token",
     });
   }
+};
+exports.google_callback = async (req, res) => {
+  const user = req.user;
+
+  const access_token = jwt.sign(
+    { userId: user._id, email: user.email },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  const refreshToken = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  user.refreshToken = refreshToken;
+
+  const one_time_code = crypto.randomBytes(32).toString("hex");
+  user.one_time_code = one_time_code;
+  user.one_time_code_expires = Date.now() + 60 * 1000;
+  await user.save();
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.redirect(`${process.env.CLIENT_URL}/auth/callback?code=${one_time_code}`);
+};
+
+exports.exchange_code = async (req, res) => {
+  const { code } = req.body;
+  const user = User.findOne({
+    one_time_code: code,
+    one_time_code_expires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "invalid or expired code" });
+  }
+  user.one_time_code = null;
+  user.one_time_code_expires = null;
+  await user.save();
+
+  const access_token = jwt.sign(
+    { userId: user._id, email: user.email },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  return res.status(200).json({ success: true, access_token });
 };

@@ -14,15 +14,17 @@ const Nav_bar = () => {
       </div>
 
       <div className="flex gap-5 ">
-        <Link href="/login">
+        <Link href="/auth/login">
           <button className="p-2 w-30 h-10 bg-green-700 rounded-2xl text-center text-white text-xl hover:bg-gray-200 hover:border-2 hover:border-green-700 transition-all duration-300">
             Log in
           </button>
         </Link>
-
-        <button className="p-2  w-30 h-10 bg-green-700 rounded-2xl text-center text-white text-xl hover:bg-gray-200 hover:border-2 hover:border-green-700 transition-all duration-300">
-          Sign up
-        </button>
+        <Link href="/auth/signUp">
+          {" "}
+          <button className="p-2  w-30 h-10 bg-green-700 rounded-2xl text-center text-white text-xl hover:bg-gray-200 hover:border-2 hover:border-green-700 transition-all duration-300">
+            Sign up
+          </button>
+        </Link>
       </div>
     </div>
   );

@@ -4,11 +4,14 @@ const app = require("../app");
 
 describe("Auth Routes", () => {
   const testUser = {
+    full_name: "okeakpu tochukwu",
     username: "tochukwu",
     email: "okeakputochukwu9@gmail.com",
     password: "password123",
     full_name: "okeakpu tochukwu",
     niche: "web developer",
+    bio: "hi im a web developer",
+    skills: [js, nextjs],
   };
 
   beforeAll(async () => {
