@@ -22,6 +22,7 @@ router.post(
   "/submit_task/:project_id",
   verify_token,
   is_task_owner,
+  upload.single("file"),
   task_controller.submit_task
 );
 

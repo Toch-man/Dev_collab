@@ -50,7 +50,6 @@ exports.update_task_status = async (req, res) => {
         },
         { new: true }
       );
-      await task.save();
     }
     if (data_to_update == "priority") {
       let update_to;
@@ -94,7 +93,7 @@ exports.submit_task = async (req, res) => {
   }
 
   try {
-    const { taskId } = req.param;
+    const { taskId } = req.params;
     const file = req.file?.path; // from multer
 
     if (!file) {

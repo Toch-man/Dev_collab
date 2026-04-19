@@ -8,13 +8,34 @@ export default function AuthCallback() {
   const params = useSearchParams();
 
   useEffect(() => {
-    const token = params.get("access_token");
-    if (token) {
-      localStorage.setItem("access_token", token);
-      router.push("/dashboard");
-    } else {
+    const code = params.get("code");
+    if (!code) {
       router.push("/login");
+      return;
     }
+
+    const exchange = async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/exchange_code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ code }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("access_token", data.access_token);
+        // clear the code from the URL before redirecting
+        window.history.replaceState({}, "", "/auth/callback");
+        router.push("/dashboard");
+      } else {
+        router.push("/auth/login");
+      }
+    };
+
+    exchange();
   }, []);
 
   return (

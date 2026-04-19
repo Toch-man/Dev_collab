@@ -5,7 +5,7 @@ const { validationResult } = require("express-validator");
 exports.get_project = async (req, res) => {
   try {
     const all_project = await Project.find({
-      $or: [{ owner: req.user._id }, { team: req.user._id }],
+      $or: [{ owner: req.userId }, { members: req.userId }],
     })
       .populate("owner", "name email")
       .populate("team", "name email")
@@ -28,9 +28,12 @@ exports.get_project = async (req, res) => {
 exports.get_single_project = async (req, res) => {
   try {
     const { project_id } = req.params;
-    const project = Project.findById(project_id);
+    const project = await Project.findById(project_id)
+      .populate("owner", "username email niche")
+      .populate("members", "username email niche");
+
     if (!project) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: "project not found",
       });
@@ -46,7 +49,7 @@ exports.get_single_project = async (req, res) => {
     console.error("error", error);
     return res.status(500).json({
       success: false,
-      message: `$error`,
+      message: error.message,
     });
   }
 };
@@ -107,7 +110,7 @@ exports.send_invite = async (req, res) => {
       - if receiver_id is provided  → owner is inviting someone
       - if no receiver_id           → user is requesting to join, owner receives it
     */
-    const sender = req.user._id;
+    const sender = req.userId;
     const receiver = receiver_id ? receiver_id : project.owner;
     const type = receiver_id ? "owner_invite" : "join_request";
 
