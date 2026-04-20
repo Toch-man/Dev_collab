@@ -2,6 +2,7 @@ const task_controller = require("../controllers/taskController");
 const { verify_token } = require("../middleware/auth");
 const { is_task_owner } = require("../middleware/auth");
 const { is_project_owner } = require("../middleware/auth");
+const { upload } = require("../config/cloudinary");
 const router = require("express").Router();
 
 router.post(
@@ -19,7 +20,7 @@ router.post(
 );
 
 router.post(
-  "/submit_task/:project_id",
+  "/submit_task/:taskId",
   verify_token,
   is_task_owner,
   upload.single("file"),

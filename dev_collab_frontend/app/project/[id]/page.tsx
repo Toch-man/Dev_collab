@@ -87,7 +87,7 @@ const CalendarIcon = () => (
   </svg>
 );
 
-// ── avatar — shows initials when no image ─────────────────────────────────────
+// ── avatar — shows initials when no image ─
 const Avatar = ({ name }: { name: string }) => {
   const initials = name
     .split(" ")
@@ -97,13 +97,12 @@ const Avatar = ({ name }: { name: string }) => {
     .slice(0, 2);
 
   return (
-    <div className="w-9 h-9 rounded-full bg-green-100 border border-green-200 flex items-center justify-center flex-shrink-0">
+    <div className="w-9 h-9 rounded-full bg-green-100 border border-green-200 flex items-center justify-center shrink-0">
       <span className="text-xs font-bold text-green-700">{initials}</span>
     </div>
   );
 };
 
-// ── main ──────────────────────────────────────────────────────────────────────
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
