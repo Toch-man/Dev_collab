@@ -116,7 +116,7 @@ export const sign_up = async (body: {
 };
 
 export const refresh_token = async () => {
-  const res = await fetch(`${API}/api/auth/refresh`, {
+  const res = await fetch(`${API}/api/auth/refresh_token`, {
     method: "POST",
     credentials: "include",
   });
