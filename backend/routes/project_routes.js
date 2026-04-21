@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const project_controller = require("../controllers/projectController");
 const { verify_token } = require("../middleware/auth");
-
+const { is_project_owner } = require("../middleware/auth");
 router.get("/view_projects", project_controller.get_project);
 
 router.get(

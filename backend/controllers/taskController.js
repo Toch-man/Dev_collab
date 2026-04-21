@@ -29,7 +29,7 @@ exports.assign_task = async (req, res) => {
   }
 };
 
-exports.update_task_status = async (req, res) => {
+exports.update_task_data = async (req, res) => {
   const { project_id } = req.params;
   const { data_to_update, update_to_id } = req.body;
 
@@ -38,8 +38,19 @@ exports.update_task_status = async (req, res) => {
     if (data_to_update == "status") {
       let update_to;
       if (update_to_id == 1) {
+        if (req.userId.toString() !== Task.find(assignedTo).toString()) {
+          return res
+            .status(401)
+            .json({ success: false, message: "unauthorised access" });
+        }
         update_to = "in_progress";
-      } else {
+      } else if ((update_to_id = 3)) {
+        if (req.userId.toString() !== project_id.toString()) {
+          return res.status(401).json({
+            success: false,
+            message: "unauthorised",
+          });
+        }
         update_to = "done";
       }
 
@@ -50,6 +61,11 @@ exports.update_task_status = async (req, res) => {
         },
         { new: true }
       );
+      return res.status(200).json({
+        success: true,
+        message: "task status updated",
+        updated_task: task,
+      });
     }
     if (data_to_update == "priority") {
       let update_to;
@@ -68,12 +84,12 @@ exports.update_task_status = async (req, res) => {
         },
         { new: true }
       );
+      return res.status(200).json({
+        success: true,
+        message: "task priority updated",
+        updated_task: task,
+      });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "task updated",
-    });
   } catch (error) {
     console.error("error", error);
     res.status(500).json({
@@ -130,4 +146,63 @@ exports.submit_task = async (req, res) => {
   }
 };
 
-//task that are under reviewed fetched and approved chnages to done else chnages to inprogres
+exports.get_submitted_task = async (req, res) => {
+  try {
+    const project_id = req.params;
+    const submitted_task = Task.find({
+      $and: [{ project: project_id }, { status: "under_review" }],
+    }).populate();
+
+    if (!submitted_task) {
+      return res.status(404).json({
+        success: false,
+        message: "no task submited yet",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      task: submitted_task,
+    });
+  } catch (error) {
+    console.error("error", error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// taskController.js
+exports.get_tasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({ assignedTo: req.user.userId })
+      .populate("project", "project_name")
+      .populate("assignedTo", "username email")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      tasks,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// also add get single task
+exports.get_single_task = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id)
+      .populate("project", "project_name")
+      .populate("assignedTo", "username email");
+
+    if (!task)
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+
+    return res.status(200).json({ success: true, task });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

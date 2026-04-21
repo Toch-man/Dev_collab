@@ -15,7 +15,6 @@ router.post(
 router.post(
   "/update_task_data/:project_id",
   verify_token,
-  is_task_owner,
   task_controller.update_task_status
 );
 
@@ -27,4 +26,14 @@ router.post(
   task_controller.submit_task
 );
 
+router.get_submitted_task(
+  "/get_submitted_task/:project_id",
+  verify_token,
+  is_project_owner,
+  task_controller.get_submitted_task
+);
+
+router.post("/get_tasks", verify_token, task_controller.get_tasks);
+
+router.post("/get_task", verify_token, task_controller.get_single_task);
 module.exports = router;
