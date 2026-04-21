@@ -146,7 +146,7 @@ exports.submit_task = async (req, res) => {
   }
 };
 
-exports.get_submitted_task = async (req, res) => {
+exports.get_submitted_tasks = async (req, res) => {
   try {
     const project_id = req.params;
     const submitted_task = Task.find({
