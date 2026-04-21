@@ -131,7 +131,7 @@ export const TASK_KEYS = {
 export const get_tasks = (force = false) =>
   cached_fetch(TASK_KEYS.tasks, force);
 
-export const submit_tasks = async () => {
-  const res = await fetch(`${API}/api/task`);
+export const submit_task = async (task_id: String, file: File) => {
+  const res = await fetch(`${API}/api/task${task_id}`);
   return res.json();
 };
