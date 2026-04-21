@@ -130,3 +130,8 @@ export const TASK_KEYS = {
 };
 export const get_tasks = (force = false) =>
   cached_fetch(TASK_KEYS.tasks, force);
+
+export const submit_tasks = async () => {
+  const res = await fetch(`${API}/api/task`);
+  return res.json();
+};
