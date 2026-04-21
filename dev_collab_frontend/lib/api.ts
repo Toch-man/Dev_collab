@@ -122,3 +122,11 @@ export const refresh_token = async () => {
   });
   return res.json();
 };
+
+//tasks
+export const TASK_KEYS = {
+  tasks: `${API}/api/tasks`,
+  project: (id: string) => `${API}/api/tasks/${id}`,
+};
+export const get_tasks = (force = false) =>
+  cached_fetch(TASK_KEYS.tasks, force);

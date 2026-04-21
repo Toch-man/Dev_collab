@@ -153,7 +153,7 @@ export default function Tasks() {
                       </p>
                     )}
                   </div>
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     <span
                       className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
                         status_styles[task.status]
