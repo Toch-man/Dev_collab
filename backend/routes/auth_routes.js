@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { body } = require("express-validator");
 const auth_controller = require("../controllers/authController");
 const { verify_token } = require("../middleware/auth");
-const passport = require("../config/googlePassport");
+const passport = require("../config/google_passport");
 const { google_callback } = require("../controllers/authController");
 
 const signup_validation = [
