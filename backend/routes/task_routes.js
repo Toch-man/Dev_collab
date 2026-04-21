@@ -15,7 +15,7 @@ router.post(
 router.post(
   "/update_task_data/:project_id",
   verify_token,
-  task_controller.update_task_status
+  task_controller.update_task_data
 );
 
 router.post(
