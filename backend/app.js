@@ -5,7 +5,27 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const app = express();
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "https://dev-collabfe.vercel.app/", // dev frontend
+];
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow mobile apps or server-to-server requests
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Blocked by CORS policy"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
