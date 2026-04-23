@@ -2,7 +2,7 @@ const task_controller = require("../controllers/taskController");
 const { verify_token } = require("../middleware/auth");
 const { is_task_owner } = require("../middleware/auth");
 const { is_project_owner } = require("../middleware/auth");
-const { upload } = require("../config/cloudinary");
+const upload = require("../middleware/upload");
 const router = require("express").Router();
 
 router.post(
@@ -13,7 +13,7 @@ router.post(
 );
 
 router.post(
-  "/update_task_data/:project_id",
+  "/update_task_data/:task_id:/project_id",
   verify_token,
   task_controller.update_task_data
 );
@@ -35,5 +35,9 @@ router.get(
 
 router.post("/get_tasks", verify_token, task_controller.get_tasks);
 
-router.post("/get_task", verify_token, task_controller.get_single_task);
+router.post(
+  "/get_task/:task_id",
+  verify_token,
+  task_controller.get_single_task
+);
 module.exports = router;

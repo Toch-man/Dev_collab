@@ -1,5 +1,7 @@
 const { validationResult } = require("express-validator");
 const Task = require("../models/task");
+const Project = require("../models/project");
+const cloudinary = require("../config/cloudinary");
 
 exports.assign_task = async (req, res) => {
   const error = validationResult(req);
@@ -30,100 +32,20 @@ exports.assign_task = async (req, res) => {
 };
 
 exports.update_task_data = async (req, res) => {
-  const { project_id } = req.params;
+  const { task_id, project_id } = req.params;
   const { data_to_update, update_to_id } = req.body;
 
   try {
-    //status would be to update status
-    if (data_to_update == "status") {
-      let update_to;
-      if (update_to_id == 1) {
-        if (req.userId.toString() !== Task.find(assignedTo).toString()) {
-          return res
-            .status(401)
-            .json({ success: false, message: "unauthorised access" });
-        }
-        update_to = "in_progress";
-      } else if ((update_to_id = 3)) {
-        if (req.userId.toString() !== project_id.toString()) {
-          return res.status(401).json({
-            success: false,
-            message: "unauthorised",
-          });
-        }
-        update_to = "done";
-      }
+    // fetch data first
+    const project = await Project.findById(project_id);
+    const task = await Task.findById(task_id);
 
-      const task = await Task.findByIdAndUpdate(
-        project_id,
-        {
-          $set: { status: update_to },
-        },
-        { new: true }
-      );
-      return res.status(200).json({
-        success: true,
-        message: "task status updated",
-        updated_task: task,
-      });
-    }
-    if (data_to_update == "priority") {
-      let update_to;
-      if (update_to_id == 0) {
-        update_to = "low";
-      } else if (update_to_id == 1) {
-        update_to = "medium";
-      } else {
-        update_to = "high";
-      }
-
-      const task = await Task.findByIdAndUpdate(
-        project_id,
-        {
-          $set: { priority: update_to },
-        },
-        { new: true }
-      );
-      return res.status(200).json({
-        success: true,
-        message: "task priority updated",
-        updated_task: task,
-      });
-    }
-  } catch (error) {
-    console.error("error", error);
-    res.status(500).json({
-      success: false,
-      message: error,
-    });
-  }
-};
-
-exports.submit_task = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
-  try {
-    const { taskId } = req.params;
-    const file = req.file?.path; // from multer
-
-    if (!file) {
-      return res.status(400).json({
+    if (!project) {
+      return res.status(404).json({
         success: false,
-        message: "No file uploaded",
+        message: "Project not found",
       });
     }
-
-    const task = await Task.findByIdAndUpdate(
-      taskId,
-      { $set: { proof: file, status: "under_review" } }, // set to under_review when submitted
-      { new: true }
-    );
 
     if (!task) {
       return res.status(404).json({
@@ -131,6 +53,127 @@ exports.submit_task = async (req, res) => {
         message: "Task not found",
       });
     }
+
+    let update_to;
+
+    // STATUS UPDATE LOGIC
+    if (data_to_update === "status") {
+      if (update_to_id === 1) {
+        // ONLY task assignee can start task
+        if (req.user.userId.toString() !== task.assignedTo.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: "Only assigned user can start this task",
+          });
+        }
+
+        update_to = "in_progress";
+      }
+
+      if (update_to_id === 3) {
+        // ONLY project owner can mark as done
+        if (req.user.userId.toString() !== project.owner.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: "Only project owner can mark task as done",
+          });
+        }
+
+        update_to = "done";
+      }
+
+      if (!update_to) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status action",
+        });
+      }
+
+      const updated_task = await Task.findByIdAndUpdate(
+        task_id,
+        { $set: { status: update_to } },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Task status updated",
+        updated_task,
+      });
+    }
+
+    // PRIORITY UPDATE LOGIC
+
+    if (data_to_update === "priority") {
+      // ONLY project owner can change priority
+      if (req.user.userId.toString() !== project.owner.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Only project owner can change priority",
+        });
+      }
+
+      update_to =
+        update_to_id === 0 ? "low" : update_to_id === 1 ? "medium" : "high";
+
+      const updated_task = await Task.findByIdAndUpdate(
+        task_id,
+        { $set: { priority: update_to } },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Task priority updated",
+        updated_task,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid update type",
+    });
+  } catch (error) {
+    console.error("error", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.submit_task = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    // convert buffer to base64
+    const fileBuffer = req.file.buffer.toString("base64");
+
+    const result = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${fileBuffer}`,
+      {
+        folder: "devcollab_tasks",
+        resource_type: "auto",
+      }
+    );
+
+    const task = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        $set: {
+          proof: result.secure_url,
+          status: "under_review",
+        },
+      },
+      { new: true }
+    );
 
     return res.status(200).json({
       success: true,
@@ -148,8 +191,8 @@ exports.submit_task = async (req, res) => {
 
 exports.get_submitted_tasks = async (req, res) => {
   try {
-    const project_id = req.params;
-    const submitted_task = Task.find({
+    const { project_id } = req.params;
+    const submitted_task = await Task.find({
       $and: [{ project: project_id }, { status: "under_review" }],
     }).populate();
 
@@ -192,7 +235,8 @@ exports.get_tasks = async (req, res) => {
 // also add get single task
 exports.get_single_task = async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id)
+    const { task_id } = req.params;
+    const task = await Task.findById(task_id)
       .populate("project", "project_name")
       .populate("assignedTo", "username email");
 

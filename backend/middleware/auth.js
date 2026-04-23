@@ -45,7 +45,7 @@ exports.is_task_owner = async (req, res, next) => {
       });
     }
 
-    if (!task.assignedTo.toString() == req.user.userId.toString()) {
+    if (task.assignedTo.toString() !== req.user.userId.toString()) {
       return res.status(404).json({
         success: false,
         message: "no authorised",
@@ -73,7 +73,7 @@ exports.is_project_owner = async (req, res, next) => {
       });
     }
 
-    if (!project.owner.toString() == req.user.userId.toString()) {
+    if (project.owner.toString() !== req.user.userId.toString()) {
       return res.status(404).json({
         success: false,
         message: "not authorised",
