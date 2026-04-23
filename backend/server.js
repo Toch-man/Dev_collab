@@ -4,6 +4,9 @@ const app = require("./app");
 
 const PORT = process.env.PORT || 5000;
 
+console.log("🔥 SERVER STARTED");
+console.log("MONGO_URL:", process.env.MONGO_URL);
+
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
