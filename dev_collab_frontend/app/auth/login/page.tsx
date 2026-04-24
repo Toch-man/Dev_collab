@@ -77,7 +77,7 @@ const Login = () => {
           </h1>
           <p
             className={`text-base ${
-              login_status ? "text-green" : "text-red"
+              login_status ? "text-green-400" : "text-red-400"
             } m-3`}
           >
             {message}
