@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { login } from "@/lib/api";
 
 const ArrowLeft = () => (
   <svg
@@ -21,14 +22,29 @@ const Login = () => {
   const [email, set_email] = useState("");
   const [password, set_password] = useState("");
   const [loading, set_loading] = useState(false);
+  const [message, set_message] = useState("");
+  const [login_status, set_login_status] = useState<Boolean>();
   const router = useRouter();
 
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault();
     set_loading(true);
     try {
-    } catch {
+      const data = await login(email, password);
+      if (!data.success) {
+        set_login_status(false);
+        set_message(data.message);
+        return;
+      }
+      set_login_status(true);
+      set_message(data.message);
+      localStorage.setItem("access_token", data.access_token);
+
+      router.push("./dashboard");
+    } catch (err: any) {
+      set_message(err.message);
     } finally {
+      set_loading(false);
     }
   };
 
@@ -58,6 +74,11 @@ const Login = () => {
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">
             Welcome back
           </h1>
+          <p
+            className={`text-base ${login_status ? "text-green" : "text-red"}`}
+          >
+            {message}
+          </p>
           <p className="text-gray-500 text-sm mb-8">
             Log in to your account to continue
           </p>
