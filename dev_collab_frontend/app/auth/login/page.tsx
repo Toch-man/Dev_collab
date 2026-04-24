@@ -34,6 +34,7 @@ const Login = () => {
       if (!data.success) {
         set_login_status(false);
         set_message(data.message);
+        set_login_status(data.success);
         return;
       }
       set_login_status(true);
