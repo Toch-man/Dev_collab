@@ -8,9 +8,11 @@ exports.sign_up = async (req, res) => {
   const error = validationResult(req);
 
   if (!error.isEmpty()) {
-    return res.status(404).json({
+    const errors = error.array();
+    return res.status(400).json({
       success: false,
-      errors: error.array(),
+      message: errors[0].msg,
+      errors: errors, // full list of all errors
     });
   }
 
