@@ -208,11 +208,9 @@ const SignUp = () => {
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
-              {error}
-            </div>
-          )}
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
+            {error}
+          </div>
 
           <form onSubmit={handle_submit} className="flex flex-col gap-4">
             {text_fields.map(({ id, label, type, placeholder }) => (
