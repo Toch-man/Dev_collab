@@ -34,7 +34,7 @@ const Login = () => {
       if (!data.success) {
         set_login_status(false);
         set_message(data.message);
-        set_login_status(data.success);
+        set_login_status(false);
         return;
       }
       set_login_status(true);
@@ -76,7 +76,9 @@ const Login = () => {
             Welcome back
           </h1>
           <p
-            className={`text-base ${login_status ? "text-green" : "text-red"}`}
+            className={`text-base ${
+              login_status ? "text-green" : "text-red"
+            } m-3`}
           >
             {message}
           </p>
