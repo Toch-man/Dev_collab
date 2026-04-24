@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  "https://dev-collabfe.vercel.app/", // dev frontend
+  "https://dev-collabfe.vercel.app", // dev frontend
 ];
 
 app.use(

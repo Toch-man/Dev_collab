@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sign_up } from "@/lib/api";
 import Link from "next/link";
 
 const ArrowLeft = () => (
@@ -51,17 +52,6 @@ const XIcon = () => (
     <path d="M18 6L6 18M6 6l12 12" />
   </svg>
 );
-
-const niches = [
-  "Web development",
-  "Mobile development",
-  "Machine learning",
-  "DevOps",
-  "UI / UX design",
-  "Blockchain",
-  "Game development",
-  "Open source",
-];
 
 type FormState = {
   full_name: string;
@@ -124,17 +114,9 @@ const SignUp = () => {
     set_loading(true);
     set_error("");
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign_up`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(form), // skills sent as array
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
+      const data = await sign_up(form);
+
+      if (data.success) {
         router.push("/dashboard");
       } else {
         set_error(data.message);
@@ -261,23 +243,14 @@ const SignUp = () => {
               >
                 Your niche
               </label>
-              <select
+              <input
                 id="niche"
                 name="niche"
                 required
                 value={form.niche}
                 onChange={handle_change}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors duration-200 bg-white text-gray-700"
-              >
-                <option value="" disabled>
-                  Select your niche...
-                </option>
-                {niches.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
+              ></input>
             </div>
 
             {/* skills tag input */}
@@ -287,7 +260,6 @@ const SignUp = () => {
                 className="text-sm font-semibold text-gray-700"
               >
                 Skills{" "}
-                <span className="text-gray-400 font-normal">(optional)</span>
               </label>
 
               {form.skills.length > 0 && (
@@ -316,7 +288,7 @@ const SignUp = () => {
                 value={skill_input}
                 onChange={(e) => set_skill_input(e.target.value)}
                 onKeyDown={handle_skill_keydown}
-                onBlur={add_skill} // also adds skill when user clicks away
+                onBlur={add_skill}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors duration-200"
               />
               <p className="text-xs text-gray-400">

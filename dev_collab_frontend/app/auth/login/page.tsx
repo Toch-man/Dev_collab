@@ -40,7 +40,7 @@ const Login = () => {
       set_message(data.message);
       localStorage.setItem("access_token", data.access_token);
 
-      router.push("./dashboard");
+      router.push("/dashboard");
     } catch (err: any) {
       set_message(err.message);
     } finally {
