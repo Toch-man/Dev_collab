@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-const log_in = useAuth();
+const { log_in } = useAuth();
 const ArrowLeft = () => (
   <svg
     viewBox="0 0 24 24"

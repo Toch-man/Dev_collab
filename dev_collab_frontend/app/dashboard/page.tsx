@@ -184,11 +184,6 @@ export default function Dashboard() {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
-  const auth_headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-
   useEffect(() => {
     if (!token) {
       router.push("/auth/login");
@@ -248,8 +243,8 @@ export default function Dashboard() {
             label="Dashboard"
             active
           />
-          <SideLink href="/projects" icon={<ProjectIcon />} label="Projects" />
-          <SideLink href="/tasks" icon={<TaskIcon />} label="Tasks" />
+          <SideLink href="/project" icon={<ProjectIcon />} label="Projects" />
+          <SideLink href="/task" icon={<TaskIcon />} label="Tasks" />
           <SideLink href="/team" icon={<TeamIcon />} label="Team" />
           <SideLink href="/profile" icon={<ProfileIcon />} label="Profile" />
         </nav>
@@ -273,7 +268,7 @@ export default function Dashboard() {
             </p>
           </div>
           <Link
-            href="/projects/new"
+            href="/project/create_project"
             className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors duration-200"
           >
             <PlusIcon /> New project
@@ -311,7 +306,7 @@ export default function Dashboard() {
             Your projects
           </h2>
           <Link
-            href="/projects"
+            href="/project"
             className="text-sm text-green-700 hover:underline font-medium"
           >
             View all
@@ -324,7 +319,7 @@ export default function Dashboard() {
               You have no projects yet
             </p>
             <Link
-              href="/projects/new"
+              href="/projects/create_project"
               className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors duration-200"
             >
               <PlusIcon /> Create your first project
