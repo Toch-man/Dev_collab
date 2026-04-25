@@ -5,10 +5,10 @@ const { validationResult } = require("express-validator");
 exports.get_project = async (req, res) => {
   try {
     const all_project = await Project.find({
-      $or: [{ owner: req.userId }, { members: req.userId }],
+      $or: [{ owner: req.user.userId }, { members: req.user.userId }],
     })
-      .populate("owner", "name email")
-      .populate("team", "name email")
+      .populate("owner", "full_name email")
+      .populate("member", "full_name email skills niche ")
       .sort(-1);
 
     return res.status(201).json({
@@ -29,8 +29,8 @@ exports.get_single_project = async (req, res) => {
   try {
     const { project_id } = req.params;
     const project = await Project.findById(project_id)
-      .populate("owner", "username email niche")
-      .populate("members", "username email niche");
+      .populate("owner", "full_name username email niche bio skills role")
+      .populate("members", "full_name username email niche bio skills role");
 
     if (!project) {
       return res.status(404).json({
@@ -110,7 +110,7 @@ exports.send_invite = async (req, res) => {
       - if receiver_id is provided  → owner is inviting someone
       - if no receiver_id           → user is requesting to join, owner receives it
     */
-    const sender = req.userId;
+    const sender = req.user.userId;
     const receiver = receiver_id ? receiver_id : project.owner;
     const type = receiver_id ? "owner_invite" : "join_request";
 
@@ -188,7 +188,7 @@ exports.accept_invite = async (req, res) => {
     }
 
     // only the receiver can accept
-    if (invite.receiver.toString() !== req.user._id.toString()) {
+    if (invite.receiver.toString() !== req.user.userId.toString()) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to accept this invite",
@@ -217,5 +217,53 @@ exports.accept_invite = async (req, res) => {
       success: false,
       message: "Server error while accepting invite",
     });
+  }
+};
+exports.get_my_invites = async (req, res) => {
+  try {
+    const invites = await Invite.find({
+      receiver: req.user.userId,
+    })
+      .populate("project", "project_name description techStack")
+      .populate("sender", "username email niche")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      invites,
+    });
+  } catch (error) {
+    console.error("Get invites error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error fetching invites",
+    });
+  }
+};
+
+// POST /api/project/reject_invite
+exports.reject_invite = async (req, res) => {
+  try {
+    const { invite_id } = req.body;
+    const invite = await Invite.findById(invite_id);
+
+    if (!invite) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invite not found" });
+    }
+
+    if (invite.receiver.toString() !== req.user.userId.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
+    }
+
+    invite.status = "rejected";
+    await invite.save();
+
+    return res.status(200).json({ success: true, message: "Invite rejected" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

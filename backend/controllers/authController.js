@@ -245,3 +245,14 @@ exports.exchange_code = async (req, res) => {
 
   return res.status(200).json({ success: true, access_token });
 };
+exports.get_all_users = async (req, res) => {
+  try {
+    const users = await User.find(
+      {},
+      "full_name username email niche bio skills role"
+    );
+    return res.status(200).json({ success: true, users });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

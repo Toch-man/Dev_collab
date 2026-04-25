@@ -34,7 +34,7 @@ app.use("/api/auth", require("./routes/auth_routes"));
 app.use("/api/project", require("./routes/project_routes"));
 app.use("/api/tasks", require("./routes/task_routes"));
 app.use("/api/notications", require("./routes/notification_routes"));
-
+app.use("api/invites", require("./routes/invite_routes"));
 app.get("/test", (req, res) => {
   res.status(200).json({ message: "test route working" });
 });

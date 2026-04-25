@@ -16,6 +16,9 @@ router.post(
   verify_token,
   project_controller.send_invite
 );
+router.get("get_invites", verify_token, project_controller.get_my_invites);
+
 router.post("/accept_invite", verify_token, project_controller.accept_invite);
 
+router.post("/reject_invite", verify_token, project_controller.reject_invite);
 module.exports = router;

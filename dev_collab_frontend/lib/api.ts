@@ -135,3 +135,14 @@ export const submit_task = async (task_id: String, file: File) => {
   const res = await fetch(`${API}/api/task/${task_id}`);
   return res.json();
 };
+
+export const get_my_invites = (force = false) =>
+  cached_fetch(`${API}/api/project/get_invites`, force);
+
+export const get_all_users = (force = false) =>
+  cached_fetch(`${API}/api/auth/get_all_users`, force);
+
+export const reject_invite = async (invite_id: String) => {
+  const res = await fetch(`${API}/api/project/reject_invite${invite_id}`);
+  return res.json();
+};
