@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { get_projects } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-
+const { user, logout } = useAuth();
 // icons
 const PlusIcon = () => (
   <svg
@@ -100,13 +102,6 @@ const ProfileIcon = () => (
 );
 
 //types
-type User = {
-  id: string;
-  username: string;
-  email: string;
-  niche: string;
-  role: string;
-};
 
 type Project = {
   _id: string;
@@ -182,7 +177,6 @@ const ProjectCard = ({ project }: { project: Project }) => (
 );
 
 export default function Dashboard() {
-  const [user, set_user] = useState<User | null>(null);
   const [projects, set_projects] = useState<Project[]>([]);
   const [loading, set_loading] = useState(true);
   const router = useRouter();
@@ -205,10 +199,7 @@ export default function Dashboard() {
 
   const fetch_data = async () => {
     try {
-      const projects_res = await fetch(`${API}/api/project`, {
-        headers: auth_headers,
-        credentials: "include",
-      });
+      const projects_res = await get_projects();
 
       if (projects_res.status === 401) {
         router.push("/login");
@@ -219,14 +210,6 @@ export default function Dashboard() {
       set_projects(projects_data.project ?? []);
 
       // parse user from token payload
-      const payload = JSON.parse(atob(token!.split(".")[1]));
-      set_user({
-        id: payload.userId,
-        email: payload.email,
-        username: "",
-        niche: "",
-        role: "",
-      });
     } catch {
       console.error("Failed to fetch dashboard data");
     } finally {
@@ -235,7 +218,7 @@ export default function Dashboard() {
   };
 
   const handle_logout = () => {
-    localStorage.removeItem("access_token");
+    logout();
     router.push("/login");
   };
 
@@ -286,7 +269,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">
-              Welcome back{user?.email ? `, ${user.email}` : ""}
+              Welcome back{user?.username ? `, ${user.username}` : ""}
             </p>
           </div>
           <Link

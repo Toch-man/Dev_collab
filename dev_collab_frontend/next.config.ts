@@ -1,16 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  outputFileTracingRoot: require("path").join(__dirname, "../../"),
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-    ],
-  },
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
 };
-module.exports = nextConfig;
+
+export default nextConfig;

@@ -136,13 +136,7 @@ exports.login = async (req, res) => {
       success: true,
       message: "Login successful",
       access_token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        wallet: user.wallet,
-      },
+      user: user,
     });
   } catch (error) {
     console.error("Login error:", error);

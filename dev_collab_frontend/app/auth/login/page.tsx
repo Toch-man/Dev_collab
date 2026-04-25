@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
+const log_in = useAuth();
 const ArrowLeft = () => (
   <svg
     viewBox="0 0 24 24"
@@ -39,8 +41,7 @@ const Login = () => {
       }
       set_login_status(true);
       set_message(data.message);
-      localStorage.setItem("access_token", data.access_token);
-
+      log_in(data.user, data.access_token);
       router.push("/dashboard");
     } catch (err: any) {
       set_message(err.message);
