@@ -82,7 +82,7 @@ export default function CreateTaskPage() {
           (p: Project) => p.owner?._id === user?.id
         );
         set_projects(owned);
-        if (preselected_project) set_selected_project_id(preselected_project);
+        if (selected_project_id) set_selected_project_id(selected_project_id);
       }
     } catch {
       set_error("Failed to load projepreselected_projectcts");
