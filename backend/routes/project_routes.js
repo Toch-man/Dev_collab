@@ -4,7 +4,7 @@ const { verify_token } = require("../middleware/auth");
 const { is_project_owner } = require("../middleware/auth");
 const upload = require("../middleware/upload");
 
-router.get("/view_projects", project_controller.get_project);
+router.get("/view_projects", project_controller.get_projects);
 router.get(
   "/project_details",
   verify_token,

@@ -2,7 +2,7 @@ const Project = require("../models/project");
 const Invite = require("../models/invite");
 const { validationResult } = require("express-validator");
 
-exports.get_project = async (req, res) => {
+exports.get_projects = async (req, res) => {
   try {
     const all_project = await Project.find({
       $or: [{ owner: req.user.userId }, { members: req.user.userId }],

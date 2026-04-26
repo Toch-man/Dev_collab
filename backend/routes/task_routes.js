@@ -6,7 +6,7 @@ const upload = require("../middleware/upload");
 const router = require("express").Router();
 
 router.post(
-  "/assign_task",
+  "/assign_task/:project_id",
   verify_token,
   is_project_owner,
   task_controller.assign_task
