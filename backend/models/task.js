@@ -13,6 +13,7 @@ const taskSchema = new Schema(
       default: "todo",
     },
     priority: { type: String, enum: ["low", "medium", "high"] },
+    due_date:{type:String, required:true}
     proof: { type: String },
   },
   { timestamps: true }

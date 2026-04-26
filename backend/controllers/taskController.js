@@ -13,8 +13,15 @@ exports.assign_task = async (req, res) => {
   }
 
   try {
+    const { project_id } = req.params();
+    const { title, description, assignedTo, priority, due_date } = req.body;
     const task = new Task({
-      ...req.body,
+      title: title,
+      description: description,
+      project: project_id,
+      assignedTo: assignedTo,
+      priority: priority,
+      due_date: due_date,
     });
     await task.save();
 
@@ -218,11 +225,13 @@ exports.get_submitted_tasks = async (req, res) => {
 // taskController.js
 exports.get_tasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ assignedTo: req.user.userId })
+    const tasks = await Task.find({
+      $or: [{ assignedTo: req.user.userId }, { owner: req.user.userId }],
+    })
       .populate("project", "project_name")
       .populate("assignedTo", "username email")
       .sort({ createdAt: -1 });
-
+    //shoud get task not oly whit assing to but also theproject the taks belongs
     return res.status(200).json({
       success: true,
       tasks,

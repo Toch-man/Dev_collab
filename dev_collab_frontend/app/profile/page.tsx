@@ -37,7 +37,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header banner */}
-      <div className="h-32 bg-gradient-to-r from-green-700 to-emerald-600 relative">
+      <div className="h-32 bg-linear-to-r from-green-700 to-emerald-600 relative">
         <div
           className="absolute inset-0 opacity-10"
           style={{

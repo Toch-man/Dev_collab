@@ -241,10 +241,9 @@ exports.get_my_invites = async (req, res) => {
   }
 };
 
-// POST /api/project/reject_invite
 exports.reject_invite = async (req, res) => {
   try {
-    const { invite_id } = req.body;
+    const { invite_id } = req.params;
     const invite = await Invite.findById(invite_id);
 
     if (!invite) {

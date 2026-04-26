@@ -128,6 +128,25 @@ export const TASK_KEYS = {
   tasks: `${API}/api/tasks`,
   project: (id: string) => `${API}/api/tasks/${id}`,
 };
+
+export const assign_task = async (
+  project_id: String,
+  body: {
+    title: string;
+    description: string;
+    assignedTo: string;
+    priority: string;
+    due_date: string;
+  }
+) => {
+  const res = await fetch(`${API}/api/tasks/assign_task/:${project_id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  return res.json();
+};
 export const get_tasks = (force = false) =>
   cached_fetch(TASK_KEYS.tasks, force);
 

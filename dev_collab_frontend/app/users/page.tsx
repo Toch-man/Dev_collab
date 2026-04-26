@@ -172,7 +172,7 @@ export default function UsersPage() {
           <select
             value={selected_project}
             onChange={(e) => set_selected_project(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors bg-white min-w-[200px]"
+            className="px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors bg-white min-w-50"
           >
             <option value="">Select project to invite to</option>
             {projects.map((p) => (

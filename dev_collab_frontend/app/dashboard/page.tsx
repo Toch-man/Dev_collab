@@ -245,7 +245,7 @@ export default function Dashboard() {
           />
           <SideLink href="/project" icon={<ProjectIcon />} label="Projects" />
           <SideLink href="/task" icon={<TaskIcon />} label="Tasks" />
-          <SideLink href="/team" icon={<TeamIcon />} label="Team" />
+          <SideLink href="/users" icon={<TeamIcon />} label="Team" />
           <SideLink href="/profile" icon={<ProfileIcon />} label="Profile" />
         </nav>
 
