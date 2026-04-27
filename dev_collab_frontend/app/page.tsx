@@ -1,5 +1,8 @@
+"use client";
 import Nav_bar from "./components/nav_bar";
 import Link from "next/link";
+import { get_all_users, get_projects } from "@/lib/api";
+import { useEffect, useState } from "react";
 
 const CodeIcon = () => (
   <svg
@@ -141,6 +144,32 @@ const stacks = [
 ];
 
 export default function Home() {
+  const [user_count, set_user_count] = useState();
+  const [project_count, set_project_count] = useState();
+
+  useEffect(() => {
+    const fetch_data = async () => {
+      await fetch_projects();
+    };
+    fetch_data();
+  }, [project_count]);
+
+  useEffect(() => {
+    const fetch_data = async () => {
+      await fetch_users();
+    };
+    fetch_data();
+  }, [user_count]);
+
+  const fetch_users = async () => {
+    const data = await get_all_users();
+    set_user_count(data.users.length);
+  };
+  const fetch_projects = async () => {
+    const data = await get_projects();
+    set_project_count(data.projects.length);
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <Nav_bar />
@@ -176,9 +205,8 @@ export default function Home() {
       <section className="border-y border-gray-200 bg-white">
         <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
           {[
-            { num: "2.4k+", label: "Developers" },
-            { num: "380+", label: "Active projects" },
-            { num: "12+", label: "Tech stacks" },
+            { num: `${user_count}`, label: "Developers" },
+            { num: `${project_count}`, label: "Active projects" },
           ].map((s) => (
             <div key={s.label} className="py-10 text-center">
               <p className="text-3xl font-extrabold text-green-700">{s.num}</p>
