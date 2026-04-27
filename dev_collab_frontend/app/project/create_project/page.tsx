@@ -90,7 +90,7 @@ export default function CreateProject() {
     try {
       const data = await create_project(form);
       if (data.success) {
-        router.push(`/projects/${data.project._id}`);
+        router.push(`/project/${data.project._id}`);
       } else {
         set_error(data.message);
       }
@@ -105,7 +105,7 @@ export default function CreateProject() {
     <div className="min-h-screen bg-gray-50 p-6 md:p-10">
       <div className="max-w-lg mx-auto">
         <Link
-          href="/projects"
+          href="/project"
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors duration-200 mb-6 w-fit"
         >
           <BackIcon /> Projects
