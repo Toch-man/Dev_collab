@@ -1,7 +1,5 @@
 // lib/api.ts
 
-import { revalidatePath } from "next/cache";
-
 const API = process.env.NEXT_PUBLIC_API_URL;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -39,7 +37,7 @@ export const invalidate = (url: string) => {
   delete cache[url];
 };
 
-// ── projects ──────────────────────────────────────────────────────────────────
+// projects
 export const KEYS = {
   projects: `${API}/api/project`,
   project: (id: string) => `${API}/api/project/${id}`,
@@ -88,7 +86,7 @@ export const accept_invite = async (invite_id: string) => {
   return res.json();
 };
 
-// ── auth ──────────────────────────────────────────────────────────────────────
+//auth
 export const login = async (email: string, password: string) => {
   const res = await fetch(`${API}/api/auth/login`, {
     method: "POST",
