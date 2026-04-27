@@ -1,5 +1,7 @@
 // lib/api.ts
 
+import { revalidatePath } from "next/cache";
+
 const API = process.env.NEXT_PUBLIC_API_URL;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -158,8 +160,17 @@ export const submit_task = async (task_id: String, file: File) => {
 export const get_my_invites = (force = false) =>
   cached_fetch(`${API}/api/project/get_invites`, force);
 
-export const get_all_users = (force = false) =>
-  cached_fetch(`${API}/api/auth/get_all_users`, force);
+export const get_all_users = async (niche?: string) => {
+  const url = niche
+    ? `${API}/api/auth/get_all_users?niche=${encodeURIComponent(niche)}`
+    : `${API}/api/auth/get_all_users`;
+  const res = await fetch(`${url}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+  return res.json();
+};
 
 export const reject_invite = async (invite_id: String) => {
   const res = await fetch(`${API}/api/project/reject_invite${invite_id}`);

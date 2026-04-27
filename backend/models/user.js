@@ -14,6 +14,8 @@ const UserSchema = new Schema(
     task: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     refreshToken: { type: String, default: null },
     one_time_code: { type: String, default: null },
+    reset_token: { type: String, default: null },
+    reset_token_expires: { type: String, default: null },
     one_time_code_expires: { type: String, default: null },
   },
   { timestamps: true }

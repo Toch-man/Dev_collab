@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-const { log_in } = useAuth();
 const ArrowLeft = () => (
   <svg
     viewBox="0 0 24 24"
@@ -27,7 +26,7 @@ const Login = () => {
   const [message, set_message] = useState("");
   const [login_status, set_login_status] = useState<Boolean>();
   const router = useRouter();
-
+  const { log_in } = useAuth();
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault();
     set_loading(true);

@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 exports.sign_up = async (req, res) => {
   const error = validationResult(req);
@@ -247,12 +248,100 @@ exports.exchange_code = async (req, res) => {
 };
 exports.get_all_users = async (req, res) => {
   try {
+    const { niche } = req.query;
+
+    const query = niche ? { niche: { $regex: niche, $options: "i" } } : {};
+
     const users = await User.find(
-      {},
+      query,
       "full_name username email niche bio skills role"
     );
+
     return res.status(200).json({ success: true, users });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
+};
+
+exports.forgot_password = async (req, res) => {
+  const error = validationResult(req);
+
+  if (!error.isEmpty()) {
+    const errors = error.array();
+    return res.status(400).json({
+      success: false,
+      message: errors[0].msg,
+      errors: errors, // full list of all errors
+    });
+  }
+
+  try {
+    const { email } = req.body;
+    const user = User.findOne({ email });
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "if email exists check email for reset link",
+      });
+    }
+
+    const raw_token = crypto.randomBytes(32).toString("hex");
+    const hashed_token = crypto.createHash("sha256").update(raw_token);
+
+    user.reset_token = hashed_token;
+    user.reset_token_expires = Date.now * 30 * 60 * 1000;
+
+    const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    });
+
+    await transporter.sendMail({
+      from: `"DevCollab" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset your password",
+      html: `
+      <p>You requested a password reset.</p>
+      <p>Click the link below  it expires in 30 minutes:</p>
+      <a href="${reset_url}">${reset_url}</a>
+      <p>If you didn't request this, ignore this email.</p>
+    `,
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "reset sent to email" });
+  } catch (error) {
+    console.error("error", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.reset_password = async (req, res) => {
+  const { token, email, new_password } = req.body;
+
+  const hashed_token = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    email,
+    reset_token: hashed_token,
+    reset_token_expires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid or expired reset link" });
+  }
+
+  user.password = await bcrypt.hash(new_password, 12);
+  user.reset_token = null;
+  user.reset_token_expires = null;
+  await user.save();
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Password reset successfully" });
 };

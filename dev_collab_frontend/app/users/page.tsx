@@ -21,8 +21,20 @@ interface Project {
   project_name: string;
 }
 
+// Niche filter tags — update these to match what your users actually pick during signup
+const NICHE_TAGS = [
+  "Frontend",
+  "Backend",
+  "Full Stack",
+  "Web3",
+  "Mobile",
+  "DevOps",
+  "UI/UX",
+  "Data Science",
+];
+
 const Avatar = ({ name }: { name: string }) => {
-  const initials = name
+  const initials = (name || "?")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -35,7 +47,7 @@ const Avatar = ({ name }: { name: string }) => {
     "bg-green-800",
     "bg-lime-700",
   ];
-  const color = colors[name.charCodeAt(0) % colors.length];
+  const color = colors[(name || "?").charCodeAt(0) % colors.length];
   return (
     <div
       className={`${color} w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-base shrink-0`}
@@ -54,6 +66,7 @@ export default function UsersPage() {
   const [users, set_users] = useState<User[]>([]);
   const [projects, set_projects] = useState<Project[]>([]);
   const [search, set_search] = useState("");
+  const [active_niche, set_active_niche] = useState(""); // selected niche tag
   const [loading, set_loading] = useState(true);
   const [selected_project, set_selected_project] = useState(
     preselected_project || ""
@@ -67,23 +80,43 @@ export default function UsersPage() {
       router.push("/auth/login");
       return;
     }
-    fetch_data();
+    fetch_projects();
   }, [token]);
 
-  const fetch_data = async () => {
+  // Re-fetch from backend whenever niche filter changes
+  useEffect(() => {
+    fetch_users(active_niche);
+  }, [active_niche]);
+
+  const fetch_projects = async () => {
     try {
-      const [users_res, projects_res] = await Promise.all([
-        get_all_users(),
-        get_projects(),
-      ]);
-      if (users_res.success)
-        set_users(users_res.users.filter((u: User) => u._id !== me?.id));
-      if (projects_res.success) set_projects(projects_res.project);
+      const res = await get_projects();
+      if (res.success) set_projects(res.project);
     } catch {
-      console.error("Failed to load");
+      console.error("Failed to load projects");
+    }
+  };
+
+  const fetch_users = async (niche?: string) => {
+    set_loading(true);
+    try {
+      const data = await get_all_users(niche);
+      if (data.success) {
+        // exclude self from the list
+        set_users(data.users.filter((u: User) => u._id !== me?.id));
+      }
+    } catch {
+      console.error("Failed to load users");
     } finally {
       set_loading(false);
     }
+  };
+
+  const handle_niche_click = (niche: string) => {
+    // clicking the active niche deselects it → loads all users
+    const next = active_niche === niche ? "" : niche;
+    set_active_niche(next);
+    set_search(""); // clear text search when switching to tag filter
   };
 
   const handle_invite = async (receiver_id: string) => {
@@ -124,6 +157,7 @@ export default function UsersPage() {
     }
   };
 
+  // Client-side text search on top of backend niche filter
   const filtered = users.filter(
     (u) =>
       u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -154,19 +188,27 @@ export default function UsersPage() {
             </div>
             <span className="text-sm text-gray-400">
               {filtered.length} developer{filtered.length !== 1 ? "s" : ""}
+              {active_niche && (
+                <span className="ml-1 text-green-700 font-medium">
+                  · {active_niche}
+                </span>
+              )}
             </span>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-6 space-y-4">
-        {/* Filters */}
+        {/* Search + project selector */}
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             placeholder="Search by name, niche, or skill..."
             value={search}
-            onChange={(e) => set_search(e.target.value)}
+            onChange={(e) => {
+              set_search(e.target.value);
+              set_active_niche(""); // clear niche tag when typing
+            }}
             className="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors"
           />
           <select
@@ -183,6 +225,37 @@ export default function UsersPage() {
           </select>
         </div>
 
+        {/* Niche filter tags */}
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-2">
+            Filter by niche
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {NICHE_TAGS.map((niche) => (
+              <button
+                key={niche}
+                onClick={() => handle_niche_click(niche)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200
+                  ${
+                    active_niche === niche
+                      ? "bg-green-700 text-white border-green-700"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-700"
+                  }`}
+              >
+                {niche}
+              </button>
+            ))}
+            {active_niche && (
+              <button
+                onClick={() => set_active_niche("")}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition-all"
+              >
+                ✕ Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         {!selected_project && (
           <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-xl">
             Select a project above before inviting a developer
@@ -195,8 +268,20 @@ export default function UsersPage() {
             <div className="w-7 h-7 border-2 border-green-700 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 text-sm">
-            No developers found
+          <div className="text-center py-16">
+            <p className="text-gray-400 text-sm">
+              {active_niche
+                ? `No ${active_niche} developers found`
+                : "No developers found"}
+            </p>
+            {active_niche && (
+              <button
+                onClick={() => set_active_niche("")}
+                className="mt-3 text-xs text-green-700 hover:underline font-medium"
+              >
+                Clear filter
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -215,9 +300,17 @@ export default function UsersPage() {
                       </p>
                       <p className="text-xs text-gray-400">@{u.username}</p>
                       {u.niche && (
-                        <p className="text-xs text-green-700 font-medium mt-0.5">
+                        <button
+                          onClick={() => handle_niche_click(u.niche)}
+                          className={`text-xs font-medium mt-0.5 transition-colors
+                            ${
+                              active_niche === u.niche
+                                ? "text-green-800 underline"
+                                : "text-green-700 hover:underline"
+                            }`}
+                        >
                           {u.niche}
-                        </p>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -230,7 +323,7 @@ export default function UsersPage() {
 
                   {u.skills?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                      {u.skills.slice(0, 4).map((s) => (
+                      {u.skills.slice(0, 5).map((s) => (
                         <span
                           key={s}
                           className="text-[10px] bg-gray-50 text-gray-600 border border-gray-100 px-2 py-0.5 rounded-md"
@@ -238,9 +331,9 @@ export default function UsersPage() {
                           {s}
                         </span>
                       ))}
-                      {u.skills.length > 4 && (
+                      {u.skills.length > 5 && (
                         <span className="text-[10px] text-gray-400">
-                          +{u.skills.length - 4}
+                          +{u.skills.length - 5}
                         </span>
                       )}
                     </div>

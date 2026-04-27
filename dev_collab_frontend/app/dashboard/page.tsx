@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { get_projects } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-const { user, logout } = useAuth();
 // icons
 const PlusIcon = () => (
   <svg
@@ -180,7 +178,7 @@ export default function Dashboard() {
   const [projects, set_projects] = useState<Project[]>([]);
   const [loading, set_loading] = useState(true);
   const router = useRouter();
-
+  const { user, logout } = useAuth();
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -189,6 +187,7 @@ export default function Dashboard() {
       router.push("/auth/login");
       return;
     }
+    console.log(user);
     fetch_data();
   }, []);
 
@@ -264,7 +263,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">
-              Welcome back{user?.username ? `, ${user.username}` : ""}
+              Welcome back {user?.username ? `, ${user.username}` : ""}
             </p>
           </div>
           <Link
