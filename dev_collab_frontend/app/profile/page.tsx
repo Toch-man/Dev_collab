@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 const Avatar = ({ name }: { name: string }) => {
-  const initials = name
+  const initials = (name || "?")
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
   return (
-    <div className="w-24 h-24 rounded-3xl bg-green-700 flex items-center justify-center text-white font-bold text-3xl">
+    <div className="w-24 h-24 rounded-3xl bg-green-700 flex items-center justify-center text-white font-bold text-3xl shrink-0">
       {initials}
     </div>
   );
@@ -35,9 +35,9 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header banner */}
-      <div className="h-32 bg-linear-to-r from-green-700 to-emerald-600 relative">
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
+      {/* Banner — reduced height so avatar doesn't overlap */}
+      <div className="h-24 bg-linear-to-r from-green-700 to-emerald-600 relative">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -49,12 +49,15 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-6">
-        {/* Avatar overlapping banner */}
-        <div className="flex items-end justify-between -mt-12 mb-6">
-          <div className="ring-4 ring-white rounded-3xl">
-            <Avatar name={user.full_name} />
+        {/* Avatar sits just below banner with negative margin */}
+        <div
+          className="flex items-end justify-between mb-6"
+          style={{ marginTop: "-48px" }}
+        >
+          <div className="ring-4 ring-white rounded-3xl bg-white">
+            <Avatar name={user.full_name || user.username} />
           </div>
-          <div className="flex gap-2 mb-1">
+          <div className="flex gap-2 pb-1">
             <button
               onClick={() => router.push("/dashboard")}
               className="text-sm bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-xl hover:border-green-300 transition-colors font-medium"
@@ -70,7 +73,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Name + username */}
+        {/* Name */}
         <div className="mb-6">
           <h1 className="text-2xl font-extrabold text-gray-900">
             {user.full_name}
@@ -81,15 +84,15 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* Stats row */}
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {stats.map((s) => (
             <div
               key={s.label}
               className="bg-white rounded-2xl border border-gray-100 px-4 py-4 text-center"
             >
-              <p className="font-bold text-gray-900 capitalize text-base">
-                {s.value}
+              <p className="font-bold text-gray-900 capitalize text-base truncate">
+                {s.value || "—"}
               </p>
               <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">
                 {s.label}
@@ -127,7 +130,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Account info */}
+        {/* Account */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-8">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
             Account
@@ -137,6 +140,12 @@ export default function ProfilePage() {
               <span className="text-sm text-gray-500">Email</span>
               <span className="text-sm font-medium text-gray-900">
                 {user.email}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Username</span>
+              <span className="text-sm font-medium text-gray-900">
+                @{user.username}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -152,17 +161,11 @@ export default function ProfilePage() {
                 {user.role}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">Username</span>
-              <span className="text-sm font-medium text-gray-900">
-                @{user.username}
-              </span>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Logout confirm modal */}
+      {/* Logout modal */}
       {show_logout_confirm && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">

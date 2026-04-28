@@ -163,7 +163,7 @@ export const get_all_users = async (niche?: string) => {
     ? `${API}/api/auth/get_all_users?niche=${encodeURIComponent(niche)}`
     : `${API}/api/auth/get_all_users`;
   const res = await fetch(`${url}`, {
-    method: "POST",
+    method: "GET",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   });

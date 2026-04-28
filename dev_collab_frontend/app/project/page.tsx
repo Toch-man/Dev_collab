@@ -141,7 +141,7 @@ export default function Projects() {
             </p>
           </div>
           <Link
-            href="/projects/new"
+            href="/project/create_project"
             className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors duration-200"
           >
             <PlusIcon /> New project
@@ -194,7 +194,7 @@ export default function Projects() {
             </p>
             {!search && filter === "all" && (
               <Link
-                href="/projects/new"
+                href="/project/create_project"
                 className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors duration-200"
               >
                 <PlusIcon /> Create your first project
@@ -206,7 +206,7 @@ export default function Projects() {
             {filtered.map((project) => (
               <Link
                 key={project._id}
-                href={`/projects/${project._id}`}
+                href={`/project/${project._id}`}
                 className="block bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-3">
