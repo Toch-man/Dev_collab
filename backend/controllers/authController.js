@@ -289,7 +289,7 @@ exports.forgot_password = async (req, res) => {
     const hashed_token = crypto.createHash("sha256").update(raw_token);
 
     user.reset_token = hashed_token;
-    user.reset_token_expires = Date.now * 30 * 60 * 1000;
+    user.reset_token_expires = Date.now() * 30 * 60 * 1000;
 
     const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
 
