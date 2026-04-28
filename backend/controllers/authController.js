@@ -285,8 +285,11 @@ exports.forgot_password = async (req, res) => {
       });
     }
 
-    const raw_token = crypto.randomBytes(32).toString("hex").digest("hex");
-    const hashed_token = crypto.createHash("sha256").update(raw_token);
+    const raw_token = crypto.randomBytes(32).toString("hex");
+    const hashed_token = crypto
+      .createHash("sha256")
+      .update(raw_token)
+      .digest("hex");
 
     user.reset_token = hashed_token;
     user.reset_token_expires = Date.now() + 30 * 60 * 1000;
