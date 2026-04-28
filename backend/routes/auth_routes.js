@@ -20,7 +20,8 @@ router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
-
+router.post("reset_password", auth_controller.reset_password);
+router.post("/forgot_password", auth_controller.forgot_password);
 router.post("/sign_up", signup_validation, auth_controller.sign_up);
 router.post("/login", login_validation, auth_controller.login);
 router.post("/refresh_token", auth_controller.refreshToken);
