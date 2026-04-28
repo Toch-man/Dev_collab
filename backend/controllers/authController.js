@@ -285,11 +285,11 @@ exports.forgot_password = async (req, res) => {
       });
     }
 
-    const raw_token = crypto.randomBytes(32).toString("hex");
+    const raw_token = crypto.randomBytes(32).toString("hex").digest("hex");
     const hashed_token = crypto.createHash("sha256").update(raw_token);
 
     user.reset_token = hashed_token;
-    user.reset_token_expires = Date.now() * 30 * 60 * 1000;
+    user.reset_token_expires = Date.now() + 30 * 60 * 1000;
 
     const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
 
@@ -310,6 +310,7 @@ exports.forgot_password = async (req, res) => {
     `,
     });
 
+    await user.save();
     return res
       .status(200)
       .json({ success: true, message: "reset sent to email" });
