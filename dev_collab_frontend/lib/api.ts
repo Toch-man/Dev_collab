@@ -39,11 +39,11 @@ export const invalidate = (url: string) => {
 
 // projects
 export const KEYS = {
-  projects: `${API}/api/project`,
-  project: (id: string) => `${API}/api/project/${id}`,
+  projects: `${API}/api/project/view_projects`,
+  project: (id: string) => `${API}/api/project/project_details/${id}`,
 };
 
-export const get_projects = (force = false) =>
+export const get_my_projects = (force = false) =>
   cached_fetch(KEYS.projects, force);
 
 export const get_project = (id: string, force = false) =>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { get_all_users, send_invite, get_projects } from "@/lib/api";
+import { get_all_users, send_invite, get_my_projects } from "@/lib/api";
 
 interface User {
   _id: string;
@@ -90,7 +90,7 @@ export default function UsersComponents() {
 
   const fetch_projects = async () => {
     try {
-      const res = await get_projects();
+      const res = await get_my_projects();
       if (res.success) set_projects(res.project);
     } catch {
       console.error("Failed to load projects");

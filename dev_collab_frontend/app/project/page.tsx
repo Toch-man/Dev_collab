@@ -95,7 +95,7 @@ export default function Projects() {
 
   const fetch_projects = async () => {
     try {
-      const res = await fetch(`${API}/api/project`, {
+      const res = await fetch(`${API}/api/project/all_projects`, {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });

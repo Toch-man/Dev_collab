@@ -2,7 +2,27 @@ const Project = require("../models/project");
 const Invite = require("../models/invite");
 const { validationResult } = require("express-validator");
 
-exports.get_projects = async (req, res) => {
+exports.all_project = async (req, res) => {
+  try {
+    const all_project = await Project.find()
+      .populate("owner", "full_name email")
+      .populate("member", "full_name email skills niche ")
+      .sort(-1);
+    return res.status(200).json({
+      success: true,
+      message: "all project fetched",
+      total_project: all_project.length,
+      projects: all_project,
+    });
+  } catch (error) {
+    console.error("error", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+exports.get_my_projects = async (req, res) => {
   try {
     const all_project = await Project.find({
       $or: [{ owner: req.user.userId }, { members: req.user.userId }],

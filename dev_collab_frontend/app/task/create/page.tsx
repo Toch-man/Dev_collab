@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { assign_task, get_projects } from "@/lib/api";
+import { assign_task, get_my_projects } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -74,7 +74,7 @@ export default function CreateTaskPage() {
 
   const fetch_projects = async () => {
     try {
-      const data = await get_projects();
+      const data = await get_my_projects();
 
       if (data.success) {
         // only show projects the user owns
