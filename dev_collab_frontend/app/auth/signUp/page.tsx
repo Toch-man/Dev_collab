@@ -117,7 +117,7 @@ const SignUp = () => {
       const data = await sign_up(form);
 
       if (data.success) {
-        router.push("/dashboard");
+        router.push("/auth/login");
       } else {
         set_error(data.message);
       }

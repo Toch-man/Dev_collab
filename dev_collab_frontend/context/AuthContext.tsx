@@ -45,6 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error("Auth init error:", err);
     } finally {
       setLoading(false);
+    },
+    return ()=>{
+        localStorage.removeItem('user')
+        localStorage.removeItem('access_token')
     }
   }, []);
 

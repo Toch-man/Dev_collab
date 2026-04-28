@@ -37,12 +37,12 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
       {/* Banner — reduced height so avatar doesn't overlap */}
-      <div className="h-24 bg-linear-to-r from-green-700 to-emerald-600 relative">
+      <div className="h-10 bg-linear-to-r from-green-700 to-emerald-600 relative">
         <div
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)",
+              "radial-gradient(circle at 20% 50%, white 2px, transparent 1px), radial-gradient(circle at 80% 20%, white 2px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
