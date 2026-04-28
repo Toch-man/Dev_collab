@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { get_projects } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
+// Icons
 const PlusIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -117,7 +117,7 @@ type Project = {
   createdAt: string;
 };
 
-// ── Sidebar link (desktop) ────────────────────────────────────────────────────
+// Sidebar link (desktop)
 const SideLink = ({
   href,
   icon,
@@ -143,7 +143,7 @@ const SideLink = ({
   </Link>
 );
 
-// ── Bottom nav link (mobile) ──────────────────────────────────────────────────
+//  Bottom nav link (mobile)
 const BottomLink = ({
   href,
   icon,
@@ -165,7 +165,7 @@ const BottomLink = ({
   </Link>
 );
 
-// ── Project card ──────────────────────────────────────────────────────────────
+// Project card
 const ProjectCard = ({ project }: { project: Project }) => (
   <Link
     href={`/project/${project._id}`}
@@ -215,7 +215,7 @@ const ProjectCard = ({ project }: { project: Project }) => (
   </Link>
 );
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+//dashboard
 export default function Dashboard() {
   const [projects, set_projects] = useState<Project[]>([]);
   const [loading, set_loading] = useState(true);
