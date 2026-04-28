@@ -277,7 +277,7 @@ exports.forgot_password = async (req, res) => {
 
   try {
     const { email } = req.body;
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(200).json({
         success: true,
