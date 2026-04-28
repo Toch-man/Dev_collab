@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { get_project, send_invite } from "@/lib/api";
 
-// ── types ─────────────────────────────────────────────────────────────────────
+// types
 type Member = {
   _id: string;
   username: string;
@@ -24,7 +24,7 @@ type Project = {
   createdAt: string;
 };
 
-// ── icons ─────────────────────────────────────────────────────────────────────
+//  icons
 const BackIcon = () => (
   <svg
     viewBox="0 0 24 24"

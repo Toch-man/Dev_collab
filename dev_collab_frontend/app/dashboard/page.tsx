@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { get_projects } from "@/lib/api";
+import { get_my_projects } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 // Icons
@@ -233,7 +233,7 @@ export default function Dashboard() {
 
   const fetch_data = async () => {
     try {
-      const data = await get_projects();
+      const data = await get_my_projects();
       if (data.success) set_projects(data.project ?? []);
     } catch {
       console.error("Failed to fetch dashboard data");
