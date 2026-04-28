@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // ── Email sent confirmation screen ────────────────────────────────────────
+  // Email sent confirmation screen
   if (sent) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
     );
   }
 
-  // ── Forgot password form ──────────────────────────────────────────────────
+  // Forgot password form
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="p-6">
