@@ -235,8 +235,8 @@ export default function Dashboard() {
     try {
       const data = await get_my_projects();
       if (data.success) set_projects(data.project ?? []);
-    } catch {
-      console.error("Failed to fetch dashboard data");
+    } catch (error: any) {
+      console.error(`${error.message}`);
     } finally {
       set_loading(false);
     }
@@ -246,8 +246,9 @@ export default function Dashboard() {
     { href: "/dashboard", icon: <ProjectIcon />, label: "Home" },
     { href: "/project", icon: <ProjectIcon />, label: "Projects" },
     { href: "/task", icon: <TaskIcon />, label: "Tasks" },
-    { href: "/invites", icon: <InviteIcon />, label: "Invites" },
+    { href: "/invite", icon: <InviteIcon />, label: "Invites" },
     { href: "/profile", icon: <ProfileIcon />, label: "Profile" },
+    { href: "/users", icon: <ProfileIcon />, label: "Users" },
   ];
 
   if (loading) {
@@ -295,7 +296,7 @@ export default function Dashboard() {
             active={pathname.startsWith("/users")}
           />
           <SideLink
-            href="/invites"
+            href="/invite"
             icon={<InviteIcon />}
             label="Invites"
             active={pathname.startsWith("/invites")}
@@ -306,6 +307,12 @@ export default function Dashboard() {
             label="Profile"
             active={pathname.startsWith("/profile")}
           />
+          <SideLink
+            href="/users"
+            icon={<ProfileIcon />}
+            label="Users"
+            active={pathname.startsWith("/users")}
+          ></SideLink>
         </nav>
 
         <button
