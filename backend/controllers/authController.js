@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+
+const { Resend } = require("resend");
 
 exports.sign_up = async (req, res) => {
   const error = validationResult(req);
@@ -287,32 +288,32 @@ exports.forgot_password = async (req, res) => {
 
     user.reset_token = hashed_token;
     user.reset_token_expires = Date.now() + 30 * 60 * 1000;
-    await user.save(); // save BEFORE sending email
+    await user.save();
 
     const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // verify connection before sending
-    await transporter.verify();
-
-    await transporter.sendMail({
-      from: `"DevCollab" <${process.env.EMAIL_USER}>`,
+    const { error: email_error } = await resend.emails.send({
+      from: "DevCollab <onboarding@resend.dev>", // use this until you verify a domain
       to: email,
-      subject: "Reset your password",
+      subject: "Reset your DevCollab password",
       html: `
-        <p>You requested a password reset.</p>
-        <p>Click the link below — it expires in 30 minutes:</p>
-        <a href="${reset_url}">${reset_url}</a>
-        <p>If you didn't request this, ignore this email.</p>
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2 style="color: #15803d;">Reset your password</h2>
+          <p>You requested a password reset for your DevCollab account.</p>
+          <p>Click the button below — the link expires in <strong>30 minutes</strong>.</p>
+          <a href="${reset_url}"
+            style="display:inline-block;margin:16px 0;padding:12px 24px;background:#15803d;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
+            Reset password
+          </a>
+          <p style="color:#6b7280;font-size:13px;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+          <p style="color:#6b7280;font-size:12px;">
+            Or copy this link: ${reset_url}
+          </p>
+        </div>
       `,
     });
 

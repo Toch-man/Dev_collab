@@ -6,8 +6,8 @@ exports.all_project = async (req, res) => {
   try {
     const all_project = await Project.find()
       .populate("owner", "full_name email")
-      .populate("member", "full_name email skills niche ")
-      .sort(-1);
+      .populate("members", "full_name email skills niche ")
+      .sort({ createdAt: 1 });
     return res.status(200).json({
       success: true,
       message: "all project fetched",
