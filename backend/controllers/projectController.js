@@ -41,7 +41,7 @@ exports.get_my_projects = async (req, res) => {
     console.error("error", error);
     return res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };
