@@ -264,19 +264,13 @@ exports.get_all_users = async (req, res) => {
 };
 
 exports.forgot_password = async (req, res) => {
-  const error = validationResult(req);
-
-  if (!error.isEmpty()) {
-    const errors = error.array();
-    return res.status(400).json({
-      success: false,
-      message: errors[0].msg,
-      errors: errors, // full list of all errors
-    });
-  }
-
   try {
     const { email } = req.body;
+
+    // add this temporarily to debug
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(200).json({
@@ -293,32 +287,40 @@ exports.forgot_password = async (req, res) => {
 
     user.reset_token = hashed_token;
     user.reset_token_expires = Date.now() + 30 * 60 * 1000;
+    await user.save(); // save BEFORE sending email
 
     const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      service: "smtp.gmail",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
+
+    // verify connection before sending
+    await transporter.verify();
 
     await transporter.sendMail({
       from: `"DevCollab" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Reset your password",
       html: `
-      <p>You requested a password reset.</p>
-      <p>Click the link below  it expires in 30 minutes:</p>
-      <a href="${reset_url}">${reset_url}</a>
-      <p>If you didn't request this, ignore this email.</p>
-    `,
+        <p>You requested a password reset.</p>
+        <p>Click the link below — it expires in 30 minutes:</p>
+        <a href="${reset_url}">${reset_url}</a>
+        <p>If you didn't request this, ignore this email.</p>
+      `,
     });
 
-    await user.save();
     return res
       .status(200)
       .json({ success: true, message: "reset sent to email" });
   } catch (error) {
-    console.error("error", error.message);
+    console.error("Forgot password error:", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

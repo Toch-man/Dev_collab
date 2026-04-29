@@ -45,6 +45,9 @@ const Login = () => {
       log_in(data.user, data.access_token);
       router.push("/dashboard");
     } catch (err: any) {
+      if (err.message == "Failed to fetch") {
+        set_message("network error");
+      }
       set_message(err.message);
     } finally {
       set_loading(false);
@@ -110,13 +113,6 @@ const Login = () => {
 
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-semibold text-gray-700"
-                >
-                  Password
-                </label>
-
                 <button
                   type="button"
                   onClick={() => router.push("/auth/forgot_password")}
