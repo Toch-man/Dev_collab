@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { get_all_projects } from "@/lib/api";
 
 const PlusIcon = () => (
   <svg
@@ -52,7 +51,7 @@ type Project = {
   _id: string;
   project_name: string;
   description: string;
-  techStack: string;
+  techStack: string[];
   isPublic: boolean;
   members: string[];
   createdAt: string;
@@ -87,7 +86,7 @@ export default function Projects() {
         (p) =>
           p.project_name.toLowerCase().includes(search.toLowerCase()) ||
           p.description.toLowerCase().includes(search.toLowerCase()) ||
-          p.techStack.toLowerCase().includes(search.toLowerCase())
+          p.techStack.join(" ").toLowerCase().includes(search.toLowerCase())
       );
     }
     set_filtered(result);
@@ -95,17 +94,10 @@ export default function Projects() {
 
   const fetch_projects = async () => {
     try {
-      const res = await fetch(`${API}/api/project/all_projects`, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-      });
-      if (res.status === 401) {
-        router.push("/login");
-        return;
-      }
-      const data = await res.json();
-      set_projects(data.project ?? []);
-      set_filtered(data.project ?? []);
+      const data = await get_all_projects();
+
+      set_projects(data.projects ?? []);
+      set_filtered(data.projects ?? []);
     } catch {
       console.error("Failed to fetch projects");
     } finally {
@@ -232,7 +224,9 @@ export default function Projects() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
-                    {project.techStack}
+                    {Array.isArray(project.techStack)
+                      ? project.techStack.slice(0, 2).join(", ")
+                      : project.techStack}
                   </span>
                   <span className="text-xs text-gray-400">
                     {project.members?.length ?? 0} member
