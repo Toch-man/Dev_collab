@@ -16,6 +16,7 @@ exports.all_project = async (req, res) => {
     });
   } catch (error) {
     console.error("error", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
