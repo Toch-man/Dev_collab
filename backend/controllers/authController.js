@@ -268,9 +268,11 @@ exports.forgot_password = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // add this temporarily to debug
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+    console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY);
+    console.log(
+      "All env keys:",
+      Object.keys(process.env).filter((k) => k.includes("RESEND"))
+    );
 
     const user = await User.findOne({ email });
     if (!user) {
