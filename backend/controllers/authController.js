@@ -292,7 +292,11 @@ exports.forgot_password = async (req, res) => {
     user.reset_token_expires = Date.now() + 30 * 60 * 1000;
     await user.save();
 
-    const reset_url = `${process.env.CLIENT_URL}/auth/reset_password?token=${raw_token}&email=${email}`;
+    const reset_url = `${
+      process.env.CLIENT_URL
+    }/auth/reset_password?token=${raw_token}&email=${encodeURIComponent(
+      email
+    )}`;
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
