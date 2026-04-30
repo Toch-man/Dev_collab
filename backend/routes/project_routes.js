@@ -2,10 +2,6 @@ const router = require("express").Router();
 const project_controller = require("../controllers/projectController");
 const { verify_token } = require("../middleware/auth");
 
-// ✅ all routes have leading slash
-// ✅ all routes that use req.user have verify_token
-// ✅ get_single_project has :project_id param
-
 router.get("/all_projects", project_controller.all_project);
 
 router.get("/view_projects", verify_token, project_controller.get_my_projects);
