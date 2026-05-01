@@ -29,10 +29,10 @@ exports.get_my_projects = async (req, res) => {
       $or: [{ owner: req.user.userId }, { members: req.user.userId }],
     })
       .populate("owner", "full_name email")
-      .populate("member", "full_name email skills niche ")
-      .sort(-1);
+      .populate("members", "full_name email skills niche ")
+      .sort({ createdAt: -1 });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "fetched all projects",
       total_project: all_project.length,

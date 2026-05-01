@@ -73,28 +73,15 @@ exports.get_notifications = async (req, res) => {
       .populate("sender", "name email")
       .sort({ createdAt: -1 });
 
+    if (!notifications) {
+      return res.status(200).json({
+        success: true,
+        message: "no notifications yet",
+      });
+    }
     return res.status(200).json({
       success: true,
       data: notifications,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.get_unread_count = async (req, res) => {
-  try {
-    const count = await Notification.countDocuments({
-      receiver: req.user.userId,
-      isRead: false,
-    });
-
-    return res.status(200).json({
-      success: true,
-      count,
     });
   } catch (error) {
     return res.status(500).json({

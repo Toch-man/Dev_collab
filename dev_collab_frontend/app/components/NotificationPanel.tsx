@@ -36,6 +36,7 @@ export default function NotificationPanel() {
 
   const markAsRead = async (id: string) => {
     await mark_as_read({ id });
+
     fetchNotifications();
     fetchUnreadCount();
   };

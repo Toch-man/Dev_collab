@@ -64,7 +64,7 @@ export const invalidate = (url: string) => {
   delete cache[url];
 };
 
-// ── projects ──────────────────────────────────────────────────────────────────
+// projects
 export const KEYS = {
   projects: `${API}/api/project/view_projects`,
   project: (id: string) => `${API}/api/project/project_details/${id}`,

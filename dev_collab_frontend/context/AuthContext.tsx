@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types";
-import { isTokenExpired, refresh_token, register_logout } from "@/lib/api";
+import { getRefreshToken, isTokenExpired, register_logout } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -47,22 +47,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (isTokenExpired(stored_token)) {
-          //  access token expired — try refresh
-          const data = await refresh_token();
+          //  access token expired try refresh
+          const data = await getRefreshToken();
 
           if (data.success) {
-            // consistent key — your backend returns "accessToken"
+            // consistent key your backend returns "accessToken"
             localStorage.setItem("access_token", data.accessToken);
             setToken(data.accessToken);
             setUser(JSON.parse(stored_user));
           } else {
-            //  refresh also failed — clear and redirect
+            //  refresh also failed  clear and redirect
             localStorage.removeItem("user");
             localStorage.removeItem("access_token");
             router.push("/auth/login");
           }
         } else {
-          // token still valid — load normally
+          // token still valid load normally
           setToken(stored_token);
           setUser(JSON.parse(stored_user));
         }
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("user");
         localStorage.removeItem("access_token");
       } finally {
-        // setLoading inside init's finally — runs after await completes
+        // setLoading inside init's finally  runs after await completes
         setLoading(false);
       }
     };
