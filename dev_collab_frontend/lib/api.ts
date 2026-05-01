@@ -216,3 +216,39 @@ export const submit_task = async (task_id: string, file: File) => {
   });
   return res.json();
 };
+
+export const send_notification = async (notification_data: {
+  receiver_id: string;
+  type: string;
+  message: string;
+}) => {
+  const res = await fetch(`${API}/api/notifications/send_notification`, {
+    method: "POST",
+    headers: { Authorization: `Bearer${get_token()}` },
+    credentials: "include",
+    body: JSON.stringify(notification_data),
+  });
+
+  return res.json();
+};
+
+export const get_notification = async () => {
+  const res = await fetch(`${API}/api/notifications/get_notification`, {
+    method: "GET",
+    headers: auth_headers(),
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+export const mark_as_read = async (notification_id: { id: string }) => {
+  const res = await fetch(`${API}/notifications/mark_as_read`, {
+    method: "POST",
+    headers: auth_headers(),
+    credentials: "include",
+    body: JSON.stringify({ notification_id }),
+  });
+
+  return res.json();
+};

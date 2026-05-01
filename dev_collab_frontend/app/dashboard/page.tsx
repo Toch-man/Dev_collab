@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { get_my_projects } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-// Icons
+const API = process.env.NEXT_PUBLIC_API_URL;
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
 const PlusIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -106,6 +108,20 @@ const InviteIcon = () => (
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 12 18.92a19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 6.18 2 2 0 0 1 4.11 4h3a2 2 0 0 1 2 1.72c.127.96.36 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 11.91a16 16 0 0 0 6 6z" />
   </svg>
 );
+const BellIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
 
 type Project = {
   _id: string;
@@ -117,7 +133,6 @@ type Project = {
   createdAt: string;
 };
 
-// Sidebar link (desktop)
 const SideLink = ({
   href,
   icon,
@@ -143,7 +158,6 @@ const SideLink = ({
   </Link>
 );
 
-//  Bottom nav link (mobile)
 const BottomLink = ({
   href,
   icon,
@@ -165,7 +179,6 @@ const BottomLink = ({
   </Link>
 );
 
-// Project card
 const ProjectCard = ({ project }: { project: Project }) => (
   <Link
     href={`/project/${project._id}`}
@@ -215,13 +228,27 @@ const ProjectCard = ({ project }: { project: Project }) => (
   </Link>
 );
 
-//dashboard
 export default function Dashboard() {
   const [projects, set_projects] = useState<Project[]>([]);
   const [loading, set_loading] = useState(true);
+  const [unread_count, set_unread_count] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const { user, token, logout } = useAuth();
+
+  const fetch_unread = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/api/notifications/unread_count`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) set_unread_count(data.count ?? 0);
+    } catch {
+      console.error("Failed to fetch unread count");
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token) {
@@ -229,15 +256,18 @@ export default function Dashboard() {
       return;
     }
     fetch_data();
+    fetch_unread();
+    // poll every 30 seconds for new notifications
+    const interval = setInterval(fetch_unread, 30000);
+    return () => clearInterval(interval);
   }, [token]);
 
   const fetch_data = async () => {
     try {
       const data = await get_my_projects();
-
       if (data.success) set_projects(data.project ?? []);
     } catch (error: any) {
-      console.error(`${error.message}`);
+      console.error(error.message);
     } finally {
       set_loading(false);
     }
@@ -249,7 +279,6 @@ export default function Dashboard() {
     { href: "/task", icon: <TaskIcon />, label: "Tasks" },
     { href: "/invite", icon: <InviteIcon />, label: "Invites" },
     { href: "/profile", icon: <ProfileIcon />, label: "Profile" },
-    { href: "/users", icon: <ProfileIcon />, label: "Users" },
   ];
 
   if (loading) {
@@ -262,7 +291,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* ── Desktop sidebar ── */}
+      {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-60 bg-white border-r border-gray-200 p-5 fixed h-full z-30">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-8 h-8 bg-black flex items-center justify-center rounded-lg">
@@ -300,7 +329,7 @@ export default function Dashboard() {
             href="/invite"
             icon={<InviteIcon />}
             label="Invites"
-            active={pathname.startsWith("/invites")}
+            active={pathname.startsWith("/invite")}
           />
           <SideLink
             href="/profile"
@@ -308,12 +337,6 @@ export default function Dashboard() {
             label="Profile"
             active={pathname.startsWith("/profile")}
           />
-          <SideLink
-            href="/users"
-            icon={<ProfileIcon />}
-            label="Users"
-            active={pathname.startsWith("/users")}
-          ></SideLink>
         </nav>
 
         <button
@@ -324,9 +347,9 @@ export default function Dashboard() {
         </button>
       </aside>
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <main className="flex-1 md:ml-60 p-6 md:p-10 pb-24 md:pb-10">
-        {/* Header */}
+        {/* Header with notification bell */}
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
@@ -334,12 +357,28 @@ export default function Dashboard() {
               Welcome back{user?.username ? `, ${user.username}` : ""}
             </p>
           </div>
-          <Link
-            href="/project/create_project"
-            className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
-          >
-            <PlusIcon /> New project
-          </Link>
+
+          <div className="flex items-center gap-3">
+            {/* 🔔 Notification bell */}
+            <Link
+              href="/notifications"
+              className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-green-300 transition-colors"
+            >
+              <BellIcon />
+              {unread_count > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {unread_count > 9 ? "9+" : unread_count}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/project/create_project"
+              className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+            >
+              <PlusIcon /> New project
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
@@ -401,7 +440,7 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* ── Mobile bottom nav ── */}
+      {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 flex items-center z-30">
         {nav_items.map(({ href, icon, label }) => (
           <BottomLink
@@ -415,6 +454,26 @@ export default function Dashboard() {
             }
           />
         ))}
+        {/* Bell in mobile nav */}
+        <Link
+          href="/notifications"
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-colors flex-1 relative
+            ${
+              pathname.startsWith("/notifications")
+                ? "text-green-700"
+                : "text-gray-400"
+            }`}
+        >
+          <div className="relative">
+            <BellIcon />
+            {unread_count > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-green-700 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {unread_count > 9 ? "9+" : unread_count}
+              </span>
+            )}
+          </div>
+          <span>Alerts</span>
+        </Link>
       </nav>
     </div>
   );

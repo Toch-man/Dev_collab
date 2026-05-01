@@ -1,3 +1,4 @@
+import { get_notification, mark_as_read } from "@/lib/api";
 import { useState, useEffect } from "react";
 
 type Notification = {
@@ -20,10 +21,8 @@ export default function NotificationPanel() {
   }, []);
 
   const fetchNotifications = async () => {
-    const res = await fetch("/api/notifications", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    const data = await res.json();
+    const data = await get_notification();
+
     setNotifications(data.data);
   };
 
@@ -36,14 +35,7 @@ export default function NotificationPanel() {
   };
 
   const markAsRead = async (id: string) => {
-    await fetch("/api/notifications/mark_as_read", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ notification_id: id }),
-    });
+    await mark_as_read({ id });
     fetchNotifications();
     fetchUnreadCount();
   };

@@ -71,14 +71,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("user");
         localStorage.removeItem("access_token");
       } finally {
-        // ✅ setLoading inside init's finally — runs after await completes
+        // setLoading inside init's finally — runs after await completes
         setLoading(false);
       }
     };
 
     init();
 
-    // ✅ register logout so api.ts can trigger it on any 401
+    // register logout so api.ts can trigger it on any 401
     register_logout(() => {
       localStorage.removeItem("user");
       localStorage.removeItem("access_token");

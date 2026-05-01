@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
@@ -25,9 +25,8 @@ export default function ProfilePage() {
 
   if (!user) {
     router.push("/auth/login");
-    return null;
+    return;
   }
-
   const stats = [
     { label: "Role", value: user.role },
     { label: "Niche", value: user.niche },

@@ -14,4 +14,10 @@ router.post(
   notification_controller.mark_as_read
 );
 
+router.get(
+  "/get_notification",
+  verify_token,
+  notification_controller.get_notifications
+);
+
 module.exports = router;
