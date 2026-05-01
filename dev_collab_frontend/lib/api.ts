@@ -3,13 +3,36 @@
 const API = process.env.NEXT_PUBLIC_API_URL;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-const get_token = () =>
-  typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+const get_token = () => localStorage.getItem("access_token");
+let logout_callback: (() => void) | null = null;
 
+export const register_logout = (fn: () => void) => {
+  logout_callback = fn;
+};
 const auth_headers = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${get_token()}`,
 });
+
+export const isTokenExpired = (token: string) => {
+  try {
+    const [, payload] = token.split(".");
+    const decoded = JSON.parse(atob(payload));
+    const now = Math.floor(Date.now() / 1000);
+    return decoded.exp < now;
+  } catch (e) {
+    return true; // if decoding fails, treat as expired
+  }
+};
+
+export const getRefreshToken = async () => {
+  const res = await fetch(`${API}/api/auth/refresh_token`, {
+    method: "GET",
+    headers: auth_headers(),
+    credentials: "include",
+  });
+  return res.json();
+};
 
 const cache: Record<string, { data: unknown; timestamp: number }> = {};
 
@@ -23,6 +46,13 @@ const cached_fetch = async (url: string, force = false) => {
     headers: auth_headers(),
     credentials: "include",
   });
+
+  //  auto logout on 401
+  if (res.status === 401) {
+    if (logout_callback) logout_callback();
+    throw new Error("Unauthorised — logged out");
+  }
+
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 
   const data = await res.json();

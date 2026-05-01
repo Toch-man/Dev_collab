@@ -225,7 +225,7 @@ exports.google_callback = async (req, res) => {
 
 exports.exchange_code = async (req, res) => {
   const { code } = req.body;
-  const user = User.findOne({
+  const user = await User.findOne({
     one_time_code: code,
     one_time_code_expires: { $gt: Date.now() },
   });
@@ -245,7 +245,20 @@ exports.exchange_code = async (req, res) => {
     { expiresIn: "15m" }
   );
 
-  return res.status(200).json({ success: true, access_token });
+  return res.status(200).json({
+    success: true,
+    access_token,
+    user: {
+      _id: user._id,
+      full_name: user.full_name,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      niche: user.niche,
+      bio: user.bio,
+      skills: user.skills,
+    },
+  });
 };
 exports.get_all_users = async (req, res) => {
   try {

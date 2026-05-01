@@ -234,6 +234,7 @@ export default function Dashboard() {
   const fetch_data = async () => {
     try {
       const data = await get_my_projects();
+
       if (data.success) set_projects(data.project ?? []);
     } catch (error: any) {
       console.error(`${error.message}`);

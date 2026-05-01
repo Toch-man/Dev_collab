@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types";
+import { isTokenExpired, refresh_token, register_logout } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -32,20 +33,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // load from localStorage on app start
   useEffect(() => {
-    try {
-      const stored_user = localStorage.getItem("user");
-      const stored_token = localStorage.getItem("access_token");
-      if (stored_user && stored_token) {
-        setUser(JSON.parse(stored_user));
-        setToken(stored_token);
+    //  async function defined AND called inside useEffect
+    const init = async () => {
+      try {
+        const stored_token = localStorage.getItem("access_token");
+        const stored_user = localStorage.getItem("user");
+
+        // nothing stored  not logged in
+        if (!stored_token || !stored_user) {
+          setLoading(false);
+          return;
+        }
+
+        if (isTokenExpired(stored_token)) {
+          //  access token expired — try refresh
+          const data = await refresh_token();
+
+          if (data.success) {
+            // consistent key — your backend returns "accessToken"
+            localStorage.setItem("access_token", data.accessToken);
+            setToken(data.accessToken);
+            setUser(JSON.parse(stored_user));
+          } else {
+            //  refresh also failed — clear and redirect
+            localStorage.removeItem("user");
+            localStorage.removeItem("access_token");
+            router.push("/auth/login");
+          }
+        } else {
+          // token still valid — load normally
+          setToken(stored_token);
+          setUser(JSON.parse(stored_user));
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+        localStorage.removeItem("user");
+        localStorage.removeItem("access_token");
+      } finally {
+        // ✅ setLoading inside init's finally — runs after await completes
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Auth init error:", err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    init();
+
+    // ✅ register logout so api.ts can trigger it on any 401
+    register_logout(() => {
+      localStorage.removeItem("user");
+      localStorage.removeItem("access_token");
+      setUser(null);
+      setToken(null);
+      router.push("/auth/login");
+    });
   }, []);
 
   const log_in = (user_data: User, user_token: string) => {

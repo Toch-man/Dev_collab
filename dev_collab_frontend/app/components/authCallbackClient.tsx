@@ -2,10 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { useAuth } from "@/context/AuthContext";
 export default function AuthCallbackClient() {
   const router = useRouter();
   const params = useSearchParams();
+  const { log_in } = useAuth();
 
   useEffect(() => {
     const code = params.get("code");
@@ -30,7 +31,7 @@ export default function AuthCallbackClient() {
         const data = await res.json();
 
         if (res.ok) {
-          localStorage.setItem("access_token", data.access_token);
+          log_in(data.user, data.access_token);
           window.history.replaceState({}, "", "/auth/callback");
           router.push("/dashboard");
         } else {

@@ -33,7 +33,7 @@ router.get(
   }),
   google_callback
 );
-
 router.get("/get_all_users", verify_token, auth_controller.get_all_users);
+router.post("/exchange_code", auth_controller.exchange_code);
 
 module.exports = router;
