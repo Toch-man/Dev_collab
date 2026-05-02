@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { get_my_invites, accept_invite, reject_invite } from "@/lib/api";
+import {
+  get_my_invites,
+  accept_invite,
+  reject_invite,
+  send_notification,
+} from "@/lib/api";
 
 interface InviteBase {
   _id: string;

@@ -1,11 +1,7 @@
 const Invite = require("../models/invite");
 const Project = require("../models/project");
-
-// GET /api/invite/my_invites
-// Returns:
-//   - invites sent TO me (owner invited me to their project)
-//   - join requests I sent (I requested to join a project)
-//   - join requests sent TO my projects (I'm the owner, someone wants to join)
+const Notification = require("../models/notifications");
+const User = require("../models/user");
 exports.get_my_invites = async (req, res) => {
   try {
     const user_id = req.user.userId;
@@ -85,6 +81,7 @@ exports.accept_invite = async (req, res) => {
     const new_member =
       invite.type === "owner_invite" ? invite.receiver : invite.sender;
 
+    //send notification
     await Project.findByIdAndUpdate(
       invite.project,
       { $addToSet: { members: new_member } },
@@ -92,8 +89,22 @@ exports.accept_invite = async (req, res) => {
     );
 
     invite.status = "accepted";
-    await invite.save();
+    const sent_to = await User.findById(invite.receiver);
+    if (!sent_to) {
+      return res.status(404).json({
+        success: false,
+        message: "Receiver not found",
+      });
+    }
 
+    const notification = new Notification({
+      sender: req.user.userId,
+      receiver: sent_to._id,
+      type: "invite",
+      message: `${invite.project.populate("name")} accepted your invite`,
+    });
+    await invite.save();
+    await notification.save();
     return res.status(200).json({
       success: true,
       message: "Invite accepted. User added to project.",
@@ -131,7 +142,22 @@ exports.reject_invite = async (req, res) => {
     }
 
     invite.status = "rejected";
+    const sent_to = await User.findById(invite.receiver);
+    if (!sent_to) {
+      return res.status(404).json({
+        success: false,
+        message: "Receiver not found",
+      });
+    }
+
+    const notification = new Notification({
+      sender: req.user.userId,
+      receiver: sent_to._id,
+      type: "reject_invite",
+      message: `${req.user.userId.populate("username")} rejected your invite`,
+    });
     await invite.save();
+    await notification.save();
 
     return res.status(200).json({ success: true, message: "Invite declined." });
   } catch (error) {

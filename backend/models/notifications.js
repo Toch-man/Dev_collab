@@ -5,7 +5,16 @@ const notificationSchema = new Schema(
   {
     sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
     receiver: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    type: { type: String, enum: ["invite", "task", "request_to_join"] },
+    type: {
+      type: String,
+      enum: [
+        "invte",
+        "accept_invite",
+        "reject_invite",
+        "task",
+        "request_to_join",
+      ],
+    },
     message: { type: String },
     isRead: { type: Boolean, default: false },
   },

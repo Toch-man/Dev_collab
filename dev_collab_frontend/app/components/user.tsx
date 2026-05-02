@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { get_all_users, send_invite, get_my_projects } from "@/lib/api";
+import {
+  get_all_users,
+  send_invite,
+  get_my_projects,
+  send_notification,
+} from "@/lib/api";
 
 interface User {
   _id: string;
@@ -26,11 +31,13 @@ const NICHE_TAGS = [
   "Frontend",
   "Backend",
   "Full Stack",
+  "smart contract",
   "Web3",
   "Mobile",
   "DevOps",
   "UI/UX",
   "Data Science",
+  "AI engineer",
 ];
 
 const Avatar = ({ name }: { name: string }) => {
@@ -137,6 +144,7 @@ export default function UsersComponents() {
     }));
     try {
       const data = await send_invite(selected_project, receiver_id);
+
       set_invite_states((prev) => ({
         ...prev,
         [receiver_id]: {

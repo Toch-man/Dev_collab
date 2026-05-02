@@ -3,12 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { get_my_projects } from "@/lib/api";
+import { get_my_projects, get_notification } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
+//Icons
 const PlusIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -230,6 +230,7 @@ const ProjectCard = ({ project }: { project: Project }) => (
 
 export default function Dashboard() {
   const [projects, set_projects] = useState<Project[]>([]);
+  const [project_count, set_project_count] = useState<number>(0);
   const [loading, set_loading] = useState(true);
   const [unread_count, set_unread_count] = useState(0);
   const router = useRouter();
@@ -239,12 +240,16 @@ export default function Dashboard() {
   const fetch_unread = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${API}/api/notifications/unread_count`, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (data.success) set_unread_count(data.count ?? 0);
+      const data = await get_notification();
+
+      if (data.success) {
+        const notifications = data.data;
+        const unread = notifications.filter(
+          (notification: any) => !notification.isRead
+        );
+
+        set_unread_count(unread.length ?? 0);
+      }
     } catch {
       console.error("Failed to fetch unread count");
     }
@@ -265,7 +270,10 @@ export default function Dashboard() {
   const fetch_data = async () => {
     try {
       const data = await get_my_projects();
-      if (data.success) set_projects(data.project ?? []);
+      if (data.success) {
+        set_projects(data.project ?? []);
+        set_project_count(data.total_project);
+      }
     } catch (error: any) {
       console.error(error.message);
     } finally {
@@ -384,7 +392,7 @@ export default function Dashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
           {[
-            { label: "Total projects", value: projects.length },
+            { label: "Total projects", value: project_count },
             {
               label: "Public projects",
               value: projects.filter((p) => p.isPublic).length,

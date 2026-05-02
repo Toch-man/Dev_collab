@@ -54,7 +54,7 @@ exports.mark_as_read = async (req, res) => {
       isRead: true,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "successful",
     });
@@ -70,7 +70,7 @@ exports.mark_as_read = async (req, res) => {
 exports.get_notifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ receiver: req.user.userId })
-      .populate("sender", "name email")
+      .populate("sender", "full_name username email")
       .sort({ createdAt: -1 });
 
     if (!notifications) {

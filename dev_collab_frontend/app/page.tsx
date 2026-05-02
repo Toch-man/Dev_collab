@@ -176,9 +176,8 @@ export default function Home() {
       <section className="border-y border-gray-200 bg-white">
         <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
           {[
-            { num: `2.4k`, label: "Developers" },
-            { num: `12`, label: "Active projects" },
-            { num: "12+", label: "Tech stacks" },
+            { num: ``, label: "Developers" },
+            { num: ``, label: "Active projects" },
           ].map((s) => (
             <div key={s.label} className="py-10 text-center">
               <p className="text-3xl font-extrabold text-green-700">{s.num}</p>

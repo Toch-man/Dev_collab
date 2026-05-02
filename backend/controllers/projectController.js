@@ -1,5 +1,6 @@
 const Project = require("../models/project");
 const Invite = require("../models/invite");
+const Notification = require("../models/notifications");
 const { validationResult } = require("express-validator");
 
 exports.all_project = async (req, res) => {
@@ -170,7 +171,21 @@ exports.send_invite = async (req, res) => {
       receiver,
       type,
     });
+    const sent_to = await User.findById(invite.receiver);
+    if (!sent_to) {
+      return res.status(404).json({
+        success: false,
+        message: "Receiver not found",
+      });
+    }
 
+    const notification = new Notification({
+      sender: req.user.userId,
+      receiver: sent_to._id,
+      type: "invite",
+      message: `${req.user.userId.populate("username")} sent your an invite`,
+    });
+    await notification.save();
     return res.status(200).json({
       success: true,
       message:
@@ -188,58 +203,6 @@ exports.send_invite = async (req, res) => {
   }
 };
 
-// ACCEPT INVITE — this is where the user actually gets added to the project
-exports.accept_invite = async (req, res) => {
-  try {
-    const { invite_id } = req.body;
-
-    const invite = await Invite.findById(invite_id);
-    if (!invite) {
-      return res.status(404).json({
-        success: false,
-        message: "Invite not found",
-      });
-    }
-
-    if (invite.status !== "pending") {
-      return res.status(400).json({
-        success: false,
-        message: "This invite has already been responded to",
-      });
-    }
-
-    // only the receiver can accept
-    if (invite.receiver.toString() !== req.user.userId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to accept this invite",
-      });
-    }
-
-    const new_member =
-      invite.type === "owner_invite" ? invite.receiver : invite.sender;
-
-    await Project.findByIdAndUpdate(
-      invite.project,
-      { $addToSet: { members: new_member } },
-      { new: true }
-    );
-
-    invite.status = "accepted";
-    await invite.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Invite accepted. User added to project.",
-    });
-  } catch (error) {
-    console.error("Accept invite error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while accepting invite",
-    });
-  }
-};
 exports.get_my_invites = async (req, res) => {
   try {
     const invites = await Invite.find({
@@ -259,31 +222,5 @@ exports.get_my_invites = async (req, res) => {
       success: false,
       message: "Server error fetching invites",
     });
-  }
-};
-
-exports.reject_invite = async (req, res) => {
-  try {
-    const { invite_id } = req.params;
-    const invite = await Invite.findById(invite_id);
-
-    if (!invite) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Invite not found" });
-    }
-
-    if (invite.receiver.toString() !== req.user.userId.toString()) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Not authorized" });
-    }
-
-    invite.status = "rejected";
-    await invite.save();
-
-    return res.status(200).json({ success: true, message: "Invite rejected" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
   }
 };

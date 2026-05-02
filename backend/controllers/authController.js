@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-
 const { Resend } = require("resend");
 
 exports.sign_up = async (req, res) => {
@@ -193,12 +192,6 @@ exports.refreshToken = async (req, res) => {
 };
 exports.google_callback = async (req, res) => {
   const user = req.user;
-
-  const access_token = jwt.sign(
-    { userId: user._id, email: user.email },
-    process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
-  );
 
   const refreshToken = jwt.sign(
     { userId: user._id },

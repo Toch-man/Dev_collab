@@ -179,13 +179,20 @@ export const get_all_users = async (niche?: string) => {
 
 // tasks
 export const TASK_KEYS = {
-  tasks: `${API}/api/tasks`,
-  task: (id: string) => `${API}/api/tasks/${id}`,
+  tasks: `${API}/api/tasks/get_tasks`,
+  task: (id: string) => `${API}/api/tasks/get_task${id}`,
 };
 
 export const get_tasks = (force = false) =>
   cached_fetch(TASK_KEYS.tasks, force);
 
+export const update_task_data = async (task_id: string, project_id: string) => {
+  const res = await fetch(
+    `${API}/api/tasks/update_task_data/${task_id}/${project_id}`
+  );
+
+  return res.json();
+};
 export const assign_task = async (
   project_id: string,
   body: {
@@ -208,7 +215,7 @@ export const assign_task = async (
 export const submit_task = async (task_id: string, file: File) => {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${API}/api/tasks/submit/${task_id}`, {
+  const res = await fetch(`${API}/api/tasks/submit_task/${task_id}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${get_token()}` },
     credentials: "include",
@@ -216,9 +223,13 @@ export const submit_task = async (task_id: string, file: File) => {
   });
   return res.json();
 };
+export const get_submitted_task = async (project_id: string) => {
+  const res = await fetch(`${API}/api/tasks/get_submitted_task/${project_id}`);
+  return res.json();
+};
 
 export const send_notification = async (notification_data: {
-  receiver_id: string;
+  receiver: string;
   type: string;
   message: string;
 }) => {
@@ -242,7 +253,7 @@ export const get_notification = async () => {
   return res.json();
 };
 
-export const mark_as_read = async (notification_id: { id: string }) => {
+export const mark_as_read = async (notification_id: string) => {
   const res = await fetch(`${API}/notifications/mark_as_read`, {
     method: "POST",
     headers: auth_headers(),
