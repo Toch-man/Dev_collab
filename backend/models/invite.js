@@ -10,13 +10,17 @@ const inviteSchema = new Schema(
       ref: "User",
       required: true,
     },
+    type: {
+      type: String,
+      enum: ["owner_invite", "join_request"],
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
       default: "pending",
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Invite", inviteSchema);

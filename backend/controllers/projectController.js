@@ -1,7 +1,8 @@
 const Project = require("../models/project");
 const Invite = require("../models/invite");
-const Notification = require("../models/notifications");
+
 const { validationResult } = require("express-validator");
+const send_notification = require("../utils/notify");
 
 exports.all_project = async (req, res) => {
   try {
@@ -113,6 +114,7 @@ exports.send_invite = async (req, res) => {
     const { project_id } = req.params;
 
     const project = await Project.findById(project_id);
+
     if (!project) {
       return res.status(404).json({
         success: false,
@@ -120,50 +122,9 @@ exports.send_invite = async (req, res) => {
       });
     }
 
-    // only restriction — private projects block join requests
-    if (!project.isPublic && !receiver_id) {
-      return res.status(403).json({
-        success: false,
-        message: "This project is private. You cannot request to join.",
-      });
-    }
-
-    /*
-      - if receiver_id is provided  → owner is inviting someone
-      - if no receiver_id           → user is requesting to join, owner receives it
-    */
     const sender = req.user.userId;
     const receiver = receiver_id ? receiver_id : project.owner;
     const type = receiver_id ? "owner_invite" : "join_request";
-
-    // check if sender is already a member
-    const already_member = (project.members || []).some(
-      (member) => member.toString() === sender.toString()
-    );
-    if (already_member) {
-      return res.status(409).json({
-        success: false,
-        message: "User is already a member of this project",
-      });
-    }
-
-    // check for an existing pending invite
-    const already_exists = await Invite.findOne({
-      project: project._id,
-      sender,
-      receiver,
-      type,
-      status: "pending",
-    });
-    if (already_exists) {
-      return res.status(409).json({
-        success: false,
-        message:
-          type === "owner_invite"
-            ? "Invite already sent to this user"
-            : "You already have a pending join request for this project",
-      });
-    }
 
     const invite = await Invite.create({
       project: project._id,
@@ -171,34 +132,31 @@ exports.send_invite = async (req, res) => {
       receiver,
       type,
     });
-    const sent_to = await User.findById(invite.receiver);
-    if (!sent_to) {
-      return res.status(404).json({
-        success: false,
-        message: "Receiver not found",
-      });
-    }
 
-    const notification = new Notification({
-      sender: req.user.userId,
-      receiver: sent_to._id,
+    //  populate for message
+    const populatedInvite = await Invite.findById(invite._id)
+      .populate("project", "project_name")
+      .populate("sender", "username");
+
+    await send_notification({
+      sender,
+      receiver,
       type: "invite",
-      message: `${req.user.userId.populate("username")} sent your an invite`,
-    });
-    await notification.save();
-    return res.status(200).json({
-      success: true,
       message:
         type === "owner_invite"
-          ? "Invite sent successfully"
-          : "Join request sent successfully",
+          ? `${populatedInvite.sender.username} invited you to ${populatedInvite.project.project_name}`
+          : `${populatedInvite.sender.username} requested to join ${populatedInvite.project.project_name}`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Invite sent",
       invite,
     });
   } catch (error) {
-    console.error("Send invite error:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error while sending invite",
+      message: error.message,
     });
   }
 };

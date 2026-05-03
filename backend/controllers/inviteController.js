@@ -2,6 +2,7 @@ const Invite = require("../models/invite");
 const Project = require("../models/project");
 const Notification = require("../models/notifications");
 const User = require("../models/user");
+const send_notification = require("../utils/notify");
 exports.get_my_invites = async (req, res) => {
   try {
     const user_id = req.user.userId;
@@ -54,7 +55,10 @@ exports.accept_invite = async (req, res) => {
     const { invite_id } = req.body;
     const user_id = req.user.userId;
 
-    const invite = await Invite.findById(invite_id);
+    const invite = await Invite.findById(invite_id)
+      .populate("project", "project_name")
+      .populate("sender receiver", "username");
+
     if (!invite) {
       return res
         .status(404)
@@ -64,53 +68,43 @@ exports.accept_invite = async (req, res) => {
     if (invite.status !== "pending") {
       return res
         .status(400)
-        .json({ success: false, message: "Invite already responded to" });
+        .json({ success: false, message: "Already handled" });
     }
 
-    // only the receiver can accept
     if (invite.receiver.toString() !== user_id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to accept this invite",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
     }
 
-    // figure out who actually joins the project
-    // owner_invite → receiver (the invited user) joins
-    // join_request → sender (the user who requested) joins
     const new_member =
       invite.type === "owner_invite" ? invite.receiver : invite.sender;
 
-    //send notification
-    await Project.findByIdAndUpdate(
-      invite.project,
-      { $addToSet: { members: new_member } },
-      { new: true }
-    );
+    await Project.findByIdAndUpdate(invite.project._id, {
+      $addToSet: { members: new_member },
+    });
 
     invite.status = "accepted";
-    const sent_to = await User.findById(invite.receiver);
-    if (!sent_to) {
-      return res.status(404).json({
-        success: false,
-        message: "Receiver not found",
-      });
-    }
-
-    const notification = new Notification({
-      sender: req.user.userId,
-      receiver: sent_to._id,
-      type: "invite",
-      message: `${invite.project.populate("name")} accepted your invite`,
-    });
     await invite.save();
-    await notification.save();
+
+    //  correct receiver logic
+    const notifyUser =
+      invite.type === "owner_invite"
+        ? invite.sender // owner gets notified
+        : invite.receiver; // owner gets notified
+
+    await send_notification({
+      sender: user_id,
+      receiver: notifyUser,
+      type: "invite_accept",
+      message: `${invite.project.project_name} invite accepted`,
+    });
+
     return res.status(200).json({
       success: true,
-      message: "Invite accepted. User added to project.",
+      message: "Invite accepted",
     });
   } catch (error) {
-    console.error("Accept invite error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -121,7 +115,10 @@ exports.reject_invite = async (req, res) => {
     const { invite_id } = req.params;
     const user_id = req.user.userId;
 
-    const invite = await Invite.findById(invite_id);
+    const invite = await Invite.findById(invite_id)
+      .populate("project", "project_name")
+      .populate("sender receiver", "username");
+
     if (!invite) {
       return res
         .status(404)
@@ -131,35 +128,32 @@ exports.reject_invite = async (req, res) => {
     if (invite.status !== "pending") {
       return res
         .status(400)
-        .json({ success: false, message: "Invite already responded to" });
+        .json({ success: false, message: "Already handled" });
     }
 
     if (invite.receiver.toString() !== user_id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to reject this invite",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized" });
     }
 
     invite.status = "rejected";
-    const sent_to = await User.findById(invite.receiver);
-    if (!sent_to) {
-      return res.status(404).json({
-        success: false,
-        message: "Receiver not found",
-      });
-    }
-
-    const notification = new Notification({
-      sender: req.user.userId,
-      receiver: sent_to._id,
-      type: "reject_invite",
-      message: `${req.user.userId.populate("username")} rejected your invite`,
-    });
     await invite.save();
-    await notification.save();
 
-    return res.status(200).json({ success: true, message: "Invite declined." });
+    const notifyUser =
+      invite.type === "owner_invite" ? invite.sender : invite.receiver;
+
+    await send_notification({
+      sender: user_id,
+      receiver: notifyUser,
+      type: "invite_reject",
+      message: `${invite.project.project_name} invite rejected`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Invite rejected",
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

@@ -79,8 +79,9 @@ export default function CreateTaskPage() {
       if (data.success) {
         // only show projects the user owns
         const owned = data.project.filter(
-          (p: Project) => p.owner?._id === user?.id
+          (p: Project) => p.owner?._id === user?.id || p.owner?._id === user?.id
         );
+
         set_projects(owned);
         if (selected_project_id) set_selected_project_id(selected_project_id);
       }

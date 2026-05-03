@@ -2,38 +2,49 @@ const { validationResult } = require("express-validator");
 const Task = require("../models/task");
 const Project = require("../models/project");
 const cloudinary = require("../config/cloudinary");
+const send_notification = require("../utils/notify");
 
 exports.assign_task = async (req, res) => {
   const error = validationResult(req);
+
   if (!error.isEmpty()) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
       errors: error.array(),
     });
   }
 
   try {
-    const { project_id } = req.params();
+    const { project_id } = req.params;
     const { title, description, assignedTo, priority, due_date } = req.body;
-    const task = new Task({
-      title: title,
-      description: description,
+
+    const task = await Task.create({
+      title,
+      description,
       project: project_id,
-      assignedTo: assignedTo,
-      priority: priority,
-      due_date: due_date,
+      assignedTo,
+      priority,
+      due_date,
     });
-    await task.save();
+
+    const project = await Project.findById(project_id).select("project_name");
+
+    await send_notification({
+      sender: req.user.userId,
+      receiver: assignedTo,
+      type: "task_assigned",
+      message: `You were assigned a task in ${project.project_name}`,
+    });
 
     return res.status(201).json({
       success: true,
-      message: "task assigned",
+      message: "Task assigned",
+      task,
     });
   } catch (error) {
-    console.error("error", error);
     return res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };
