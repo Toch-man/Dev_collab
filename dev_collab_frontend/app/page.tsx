@@ -1,10 +1,6 @@
 import Nav_bar from "./components/nav_bar";
 import Link from "next/link";
-import {
-  niche_count,
-  project_count,
-  user_count,
-} from "./components/statistics";
+import Stats from "./components/statistics";
 
 const CodeIcon = () => (
   <svg
@@ -179,18 +175,7 @@ export default async function Home() {
 
       {/* STATS */}
       <section className="border-y border-gray-200 bg-white">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
-          {[
-            { num: `${await user_count}`, label: "Developers" },
-            { num: `${await project_count()}`, label: "Active projects" },
-            { num: `${niche_count}`, label: "Niches" },
-          ].map((s) => (
-            <div key={s.label} className="py-10 text-center">
-              <p className="text-3xl font-extrabold text-green-700">{s.num}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
+        <Stats />
       </section>
 
       {/* FEATURES */}

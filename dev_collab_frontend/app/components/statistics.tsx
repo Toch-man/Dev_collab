@@ -1,22 +1,38 @@
+"use client";
 import { get_all_users } from "@/lib/api";
 import { get_all_projects } from "@/lib/api";
 import { User } from "@/types";
+import { useEffect, useState } from "react";
 
-const niche = (user: User[]) => {
-  const unique_niches = new Set(user.map((u) => u.niche));
-  return unique_niches.size;
-};
-const user_detail = async () => {
-  const data = await get_all_users();
-  const user_count = data.users.length;
-  const niche_count = niche(data.user);
-  return { user_count, niche_count };
-};
+const Stats = () => {
+  const [stats, set_stats] = useState({ user: 0, projects: 0, niches: 0 });
 
-export const project_count = async () => {
-  const data = await get_all_projects();
-  const project_count = data.total_project;
-  return project_count;
-};
+  useEffect(() => {
+    async () => {
+      const users = await get_all_users();
+      const project = await get_all_projects();
+      const unique_niche = new Set(users.users.map((u: User) => u.niche)).size;
 
-export const { user_count, niche_count } = await user_detail();
+      set_stats({
+        user: users.users.length,
+        projects: project.total_project,
+        niches: unique_niche,
+      });
+    };
+  });
+  return (
+    <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
+      {[
+        { num: `${stats.user}`, label: "Developers" },
+        { num: `${stats.projects}`, label: "Active projects" },
+        { num: `${stats.niches}`, label: "Niches" },
+      ].map((s) => (
+        <div key={s.label} className="py-10 text-center">
+          <p className="text-3xl font-extrabold text-green-700">{s.num}</p>
+          <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+export default Stats;
