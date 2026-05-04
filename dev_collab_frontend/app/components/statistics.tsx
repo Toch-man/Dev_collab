@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 
 const Stats = () => {
   const [stats, set_stats] = useState({ user: 0, projects: 0, niches: 0 });
-
+  const [loading, set_loading] = useState(false);
   useEffect(() => {
     async () => {
+      set_loading(true);
+
       const users = await get_all_users();
       const project = await get_all_projects();
       const unique_niche = new Set(users.users.map((u: User) => u.niche)).size;
@@ -19,6 +21,7 @@ const Stats = () => {
         niches: unique_niche,
       });
     };
+    set_loading(false);
   }, []);
   return (
     <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
