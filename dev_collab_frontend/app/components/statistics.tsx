@@ -19,7 +19,7 @@ const Stats = () => {
         niches: unique_niche,
       });
     };
-  });
+  }, []);
   return (
     <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
       {[
