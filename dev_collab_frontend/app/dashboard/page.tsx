@@ -6,8 +6,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { get_my_projects, get_notification } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
 //Icons
 const PlusIcon = () => (
   <svg

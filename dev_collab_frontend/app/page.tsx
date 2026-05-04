@@ -183,7 +183,7 @@ export default async function Home() {
           {[
             { num: `${await user_count}`, label: "Developers" },
             { num: `${await project_count()}`, label: "Active projects" },
-            { num: `${await niche_count}`, label: "Niches" },
+            { num: `${niche_count}`, label: "Niches" },
           ].map((s) => (
             <div key={s.label} className="py-10 text-center">
               <p className="text-3xl font-extrabold text-green-700">{s.num}</p>
