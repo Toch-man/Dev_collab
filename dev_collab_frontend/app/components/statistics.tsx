@@ -6,7 +6,7 @@ const niche = (user: User[]) => {
   const unique_niches = new Set(user.map((u) => u.niche));
   return unique_niches.size;
 };
-export const user_detail = async () => {
+const user_detail = async () => {
   const data = await get_all_users();
   const user_count = data.users.length;
   const niche_count = niche(data.user);
@@ -18,3 +18,5 @@ export const project_count = async () => {
   const project_count = data.total_project;
   return project_count;
 };
+
+export const { user_count, niche_count } = await user_detail();
