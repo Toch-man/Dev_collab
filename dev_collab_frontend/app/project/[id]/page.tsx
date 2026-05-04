@@ -188,7 +188,7 @@ export default function ProjectPage() {
       <div className="max-w-4xl mx-auto">
         {/* back link */}
         <Link
-          href="/projects"
+          href="/project"
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-700 transition-colors duration-200 mb-6 w-fit"
         >
           <BackIcon /> Projects
@@ -328,7 +328,7 @@ export default function ProjectPage() {
                 Invite a developer
               </h2>
               <p className="text-gray-500 text-sm mb-4">
-                Enter the user ID of the developer you want to invite
+                Enter the email of the developer you want to invite
               </p>
 
               <form onSubmit={handle_invite} className="flex gap-3 flex-wrap">

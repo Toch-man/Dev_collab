@@ -3,12 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import {
-  get_all_users,
-  send_invite,
-  get_my_projects,
-  send_notification,
-} from "@/lib/api";
+import { get_all_users, send_invite, get_my_projects } from "@/lib/api";
 
 interface User {
   _id: string;
@@ -168,7 +163,7 @@ export default function UsersComponents() {
   // Client-side text search on top of backend niche filter
   const filtered = users.filter(
     (u) =>
-      u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      u._id?.toLowerCase().includes(search.toLowerCase()) ||
       u.username?.toLowerCase().includes(search.toLowerCase()) ||
       u.niche?.toLowerCase().includes(search.toLowerCase()) ||
       u.skills?.some((s) => s.toLowerCase().includes(search.toLowerCase()))
@@ -305,6 +300,9 @@ export default function UsersComponents() {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-900 text-sm truncate">
                         {u.full_name}
+                      </p>
+                      <p className="font-bold text-gray-900 text-sm truncate">
+                        Id: {u.full_name}
                       </p>
                       <p className="text-xs text-gray-400">@{u.username}</p>
                       {u.niche && (
