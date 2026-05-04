@@ -4,7 +4,6 @@ const Project = require("../models/project");
 const cloudinary = require("../config/cloudinary");
 const send_notification = require("../utils/notify");
 
-// ── POST /api/tasks/assign_task/:project_id ───────────────────────────────────
 exports.assign_task = async (req, res) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {

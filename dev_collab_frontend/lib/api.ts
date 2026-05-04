@@ -228,21 +228,6 @@ export const get_submitted_task = async (project_id: string) => {
   return res.json();
 };
 
-export const send_notification = async (notification_data: {
-  receiver: string;
-  type: string;
-  message: string;
-}) => {
-  const res = await fetch(`${API}/api/notifications/send_notification`, {
-    method: "POST",
-    headers: { Authorization: `Bearer${get_token()}` },
-    credentials: "include",
-    body: JSON.stringify(notification_data),
-  });
-
-  return res.json();
-};
-
 export const get_notification = async () => {
   const res = await fetch(`${API}/api/notifications/get_notification`, {
     method: "GET",
