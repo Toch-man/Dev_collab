@@ -26,9 +26,12 @@ const Stats = () => {
   return (
     <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
       {[
-        { num: `${stats.user}`, label: "Developers" },
-        { num: `${stats.projects}`, label: "Active projects" },
-        { num: `${stats.niches}`, label: "Niches" },
+        { num: `${loading ? "..." : stats.user}`, label: "Developers" },
+        {
+          num: `${loading ? "..." : stats.projects}`,
+          label: "Active projects",
+        },
+        { num: `${loading ? "..." : stats.niches}`, label: "Niches" },
       ].map((s) => (
         <div key={s.label} className="py-10 text-center">
           <p className="text-3xl font-extrabold text-green-700">{s.num}</p>
