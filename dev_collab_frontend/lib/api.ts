@@ -165,12 +165,13 @@ export const refresh_token = async () => {
   return res.json();
 };
 
-export const get_all_users = async (niche?: string) => {
-  const url = niche
-    ? `${API}/api/auth/get_all_users?niche=${encodeURIComponent(niche)}`
-    : `${API}/api/auth/get_all_users`;
+export const get_all_users = async (niche?: string, project_id?: string) => {
+  const params = new URLSearchParams();
+  if (niche) params.append("niche", niche);
+  if (project_id) params.append("project_id", project_id);
+
+  const url = `${API}/api/auth/get_all_users?${params.toString()}`;
   const res = await fetch(url, {
-    method: "GET",
     headers: auth_headers(),
     credentials: "include",
   });
