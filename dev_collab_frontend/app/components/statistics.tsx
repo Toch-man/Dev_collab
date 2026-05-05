@@ -22,7 +22,7 @@ const Stats = () => {
       });
     };
     set_loading(false);
-  }, []);
+  }, [stats]);
   return (
     <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
       {[

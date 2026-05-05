@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const User = require("../models/user");
+const Project = require("../models/project");
 const jwt = require("jsonwebtoken");
 const { Resend } = require("resend");
 
@@ -255,9 +256,20 @@ exports.exchange_code = async (req, res) => {
 };
 exports.get_all_users = async (req, res) => {
   try {
-    const { niche } = req.query;
+    const { niche, project_id } = req.query;
 
-    const query = niche ? { niche: { $regex: niche, $options: "i" } } : {};
+    let query = niche ? { niche: { $regex: niche, $options: "i" } } : {};
+
+    //  if project_id provided, exclude existing members and owner
+    if (project_id) {
+      const project = await Project.findById(project_id).select(
+        "members owner"
+      );
+      if (project) {
+        const exclude_ids = [...project.members, project.owner];
+        query._id = { $nin: exclude_ids };
+      }
+    }
 
     const users = await User.find(
       query,

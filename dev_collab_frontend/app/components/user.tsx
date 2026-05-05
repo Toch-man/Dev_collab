@@ -99,12 +99,12 @@ export default function UsersComponents() {
     }
   };
 
-  const fetch_users = async (niche?: string) => {
+  // change fetch_users to accept project_id
+  const fetch_users = async (niche?: string, project_id?: string) => {
     set_loading(true);
     try {
-      const data = await get_all_users(niche);
+      const data = await get_all_users(niche, project_id);
       if (data.success) {
-        // exclude self from the list
         set_users(data.users.filter((u: User) => u._id !== me?.id));
       }
     } catch {
@@ -113,6 +113,11 @@ export default function UsersComponents() {
       set_loading(false);
     }
   };
+
+  // update useEffect to re-fetch when project changes too
+  useEffect(() => {
+    fetch_users(active_niche, selected_project);
+  }, [active_niche, selected_project]);
 
   const handle_niche_click = (niche: string) => {
     // clicking the active niche deselects it → loads all users
@@ -302,7 +307,7 @@ export default function UsersComponents() {
                         {u.full_name}
                       </p>
                       <p className="font-bold text-gray-900 text-sm truncate">
-                        Id: {u.full_name}
+                        Id: {u._id}
                       </p>
                       <p className="text-xs text-gray-400">@{u.username}</p>
                       {u.niche && (
