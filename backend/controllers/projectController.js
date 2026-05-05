@@ -83,7 +83,7 @@ exports.create_project = async (req, res) => {
   if (!error.isEmpty()) {
     return res.status(500).json({
       success: false,
-      errors: error.array(),
+      errors: error.array()[0].msg,
     });
   }
   try {
@@ -103,8 +103,7 @@ exports.create_project = async (req, res) => {
     console.error("error", error);
     return res.status(500).json({
       success: false,
-      message: "server error during creation",
-      error: error.message,
+      message: error.message,
     });
   }
 };

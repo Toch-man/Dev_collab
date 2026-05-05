@@ -157,14 +157,6 @@ export const sign_up = async (body: {
   return res.json();
 };
 
-export const refresh_token = async () => {
-  const res = await fetch(`${API}/api/auth/refresh_token`, {
-    method: "POST",
-    credentials: "include",
-  });
-  return res.json();
-};
-
 export const get_all_users = async (niche?: string, project_id?: string) => {
   const params = new URLSearchParams();
   if (niche) params.append("niche", niche);

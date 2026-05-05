@@ -13,7 +13,7 @@ exports.sign_up = async (req, res) => {
     const errors = error.array();
     return res.status(400).json({
       success: false,
-      message: errors[0].msg,
+      message: errors.array()[0].msg,
       errors: errors, // full list of all errors
     });
   }
@@ -187,7 +187,7 @@ exports.refreshToken = async (req, res) => {
   } catch (error) {
     return res.status(403).json({
       success: false,
-      message: "Invalid or expired refresh token",
+      message: error.message,
     });
   }
 };
