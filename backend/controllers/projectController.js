@@ -89,7 +89,7 @@ exports.create_project = async (req, res) => {
   try {
     const project = await Project.create({
       ...req.body,
-      members: members.push(req.user.userId),
+      members: [req.user.userId],
       owner: req.user.userId,
     });
     await project.save();
