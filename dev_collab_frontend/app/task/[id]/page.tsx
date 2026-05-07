@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { submit_task } from "@/lib/api";
+import { submit_task, update_task_data } from "@/lib/api";
 import {
   StatusBadge,
   PriorityBadge,
@@ -120,22 +120,10 @@ export default function TaskPage() {
     set_status_loading(true);
     set_status_msg("");
     try {
-      const res = await fetch(
-        `${API}/api/tasks/update_task_data/${task._id}/${task.project._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${get_token()}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            data_to_update: "status",
-            update_to_id: status_to_id[new_status],
-          }),
-        }
-      );
-      const data = await res.json();
+      const data = await update_task_data(task._id, task.project._id, {
+        data_to_update: "status",
+        update_to_id: status_to_id[new_status],
+      });
       if (data.success) {
         set_task(data.updated_task);
         set_status_msg("Status updated successfully");
@@ -155,22 +143,10 @@ export default function TaskPage() {
     set_priority_loading(true);
     set_priority_msg("");
     try {
-      const res = await fetch(
-        `${API}/api/tasks/update_task_data/${task._id}/${task.project._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${get_token()}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            data_to_update: "priority",
-            update_to_id: priority_to_id[new_priority],
-          }),
-        }
-      );
-      const data = await res.json();
+      const data = await update_task_data(task._id, task.project._id, {
+        data_to_update: "priority",
+        update_to_id: priority_to_id[new_priority],
+      });
       if (data.success) {
         set_task(data.updated_task);
         set_priority_msg(`Priority updated to ${new_priority}`);

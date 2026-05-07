@@ -29,8 +29,11 @@ router.delete(
   project_controller.delete_project
 );
 
-router.post(
+router.patch(
   "/remove_member/:project_id",
+  verify_token,
   is_project_owner,
   project_controller.remove_member
 );
+
+module.exports = router;

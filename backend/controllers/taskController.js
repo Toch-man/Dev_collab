@@ -185,7 +185,7 @@ exports.submit_task = async (req, res) => {
     const fileBuffer = req.file.buffer.toString("base64");
     const result = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${fileBuffer}`,
-      { folder: "devcollab_tasks", resource_type: "auto" }
+      { folder: "dev_collab_task", resource_type: "auto" }
     );
 
     const task = await Task.findByIdAndUpdate(

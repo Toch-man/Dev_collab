@@ -12,7 +12,7 @@ router.post(
   task_controller.assign_task
 );
 
-router.post(
+router.ptch(
   "/update_task_data/:task_id/:project_id",
   verify_token,
   task_controller.update_task_data

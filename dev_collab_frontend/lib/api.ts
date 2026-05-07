@@ -113,7 +113,7 @@ export const remove_member = async (
   member_id: { member_id: string }
 ) => {
   const res = await fetch(`${API}/api/project/remove_member/${project_id}`, {
-    method: "POST",
+    method: "PATCH",
     headers: auth_headers(),
     credentials: "include",
     body: stringify(member_id),
@@ -206,9 +206,22 @@ export const TASK_KEYS = {
 export const get_tasks = (force = false) =>
   cached_fetch(TASK_KEYS.tasks, force);
 
-export const update_task_data = async (task_id: string, project_id: string) => {
+export const update_task_data = async (
+  task_id: string,
+  project_id: string,
+  {
+    data_to_update,
+    update_to_id,
+  }: { data_to_update: string; update_to_id: number }
+) => {
   const res = await fetch(
-    `${API}/api/tasks/update_task_data/${task_id}/${project_id}`
+    `${API}/api/tasks/update_task_data/${task_id}/${project_id}`,
+    {
+      method: "PATCH",
+      headers: auth_headers(),
+      credentials: "include",
+      body: JSON.stringify({ data_to_update, update_to_id }),
+    }
   );
 
   return res.json();
@@ -269,7 +282,7 @@ export const get_notification = async () => {
 
 export const mark_as_read = async (notification_id: string) => {
   const res = await fetch(`${API}/notifications/mark_as_read`, {
-    method: "POST",
+    method: "PATCH",
     headers: auth_headers(),
     credentials: "include",
     body: JSON.stringify({ notification_id }),

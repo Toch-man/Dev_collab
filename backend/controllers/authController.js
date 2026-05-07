@@ -29,7 +29,7 @@ exports.sign_up = async (req, res) => {
     const fileBuffer = req.file.buffer.toString("base64");
     const result = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${fileBuffer}`,
-      { folder: "devcollab_user", resource_type: "auto" }
+      { folder: "dev_collab_user", resource_type: "auto" }
     );
     const existing_user = await User.findOne({
       $or: [{ email }, { username }],
