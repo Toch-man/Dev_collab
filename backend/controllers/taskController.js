@@ -80,7 +80,7 @@ exports.update_task_data = async (req, res) => {
     const is_assigned =
       req.user.userId.toString() === task.assignedTo._id.toString();
 
-    // ── STATUS UPDATE ─────────────────────────────────────────────────────────
+    // ── STATUS UPDATE
     if (data_to_update === "status") {
       let update_to;
 
