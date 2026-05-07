@@ -132,7 +132,6 @@ export default function ProjectPage() {
       if (!data.success) {
         set_error(data.message);
         return;
-        return;
       }
       set_project(data.project);
     } catch {

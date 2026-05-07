@@ -16,7 +16,7 @@ const UserSchema = new Schema(
     refreshToken: { type: String, default: null },
     one_time_code: { type: String, default: null },
     reset_token: { type: String, default: null },
-    reset_token_expires: { type: , default: null },
+    reset_token_expires: { type: Date, default: null },
     one_time_code_expires: { type: String, default: null },
   },
   { timestamps: true }
