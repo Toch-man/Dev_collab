@@ -1,6 +1,7 @@
 const Project = require("../models/project");
 const Invite = require("../models/invite");
-
+const cloudinary = require("../cofig/cloudinary");
+const send_notification = require("../utils/notify");
 const { validationResult } = require("express-validator");
 const send_notification = require("../utils/notify");
 
@@ -180,5 +181,96 @@ exports.get_my_invites = async (req, res) => {
       success: false,
       message: "Server error fetching invites",
     });
+  }
+};
+
+exports.delete_project = async (req, res) => {
+  try {
+    const { project_id } = req.params;
+    const project = await Project.findById(project_id);
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found" });
+    }
+
+    // notify all members before deleting
+    if (project.members?.length > 0) {
+      await Promise.all(
+        project.members.map((member_id) =>
+          send_notification({
+            sender: req.user.userId,
+            receiver: member_id,
+            type: "project",
+            message: `The project "${project.project_name}" has been deleted`,
+          })
+        )
+      );
+    }
+
+    // delete all tasks belonging to this project too
+    await Task.deleteMany({ project: project_id });
+
+    await Project.findByIdAndDelete(project_id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Project deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete project error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.remove_member = async (req, res) => {
+  try {
+    const { project_id } = req.params;
+    const { member_id } = req.body;
+
+    const project = await Project.findById(project_id);
+    if (!project) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found" });
+    }
+
+    // can't remove the owner
+    if (member_id === project.owner.toString()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Cannot remove the project owner" });
+    }
+
+    const is_member = project.members.some((m) => m.toString() === member_id);
+    if (!is_member) {
+      return res.status(404).json({
+        success: false,
+        message: "User is not a member of this project",
+      });
+    }
+
+    await Project.findByIdAndUpdate(
+      project_id,
+      { $pull: { members: member_id } },
+      { new: true }
+    );
+
+    // notify removed member
+    await send_notification({
+      sender: req.user.userId,
+      receiver: member_id,
+      type: "project",
+      message: `You have been removed from "${project.project_name}"`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Member removed successfully",
+    });
+  } catch (error) {
+    console.error("Remove member error:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

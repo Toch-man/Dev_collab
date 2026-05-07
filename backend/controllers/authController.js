@@ -20,6 +20,17 @@ exports.sign_up = async (req, res) => {
 
   try {
     const { username, email, password } = req.body;
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "please enter display picture" });
+    }
+
+    const fileBuffer = req.file.buffer.toString("base64");
+    const result = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${fileBuffer}`,
+      { folder: "devcollab_user", resource_type: "auto" }
+    );
     const existing_user = await User.findOne({
       $or: [{ email }, { username }],
     });
@@ -37,6 +48,7 @@ exports.sign_up = async (req, res) => {
 
     const new_user = new User({
       ...req.body,
+      avatar: result.secure_url,
       password: hashed_password,
     });
 

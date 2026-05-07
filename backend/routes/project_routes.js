@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const project_controller = require("../controllers/projectController");
-const { verify_token } = require("../middleware/auth");
+const { verify_token, is_project_owner } = require("../middleware/auth");
 
 router.get("/all_projects", verify_token, project_controller.all_project);
 
@@ -22,4 +22,15 @@ router.post(
 
 router.get("/get_invites", verify_token, project_controller.get_my_invites);
 
-module.exports = router;
+router.delete(
+  "/delete_project/:project_id",
+  verify_token,
+  is_project_owner,
+  project_controller.delete_project
+);
+
+router.post(
+  "/remove_member/:project_id",
+  is_project_owner,
+  project_controller.remove_member
+);

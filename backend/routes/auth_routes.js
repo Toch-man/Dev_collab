@@ -4,7 +4,7 @@ const auth_controller = require("../controllers/authController");
 const { verify_token } = require("../middleware/auth");
 const passport = require("../config/google_passport");
 const { google_callback } = require("../controllers/authController");
-
+const upload = require("../middleware/upload");
 const signup_validation = [
   body("username").trim().isLength({ min: 3, max: 30 }),
   body("email").isEmail().normalizeEmail(),
@@ -22,7 +22,12 @@ router.get(
 );
 router.post("/reset_password", auth_controller.reset_password);
 router.post("/forgot_password", auth_controller.forgot_password);
-router.post("/sign_up", signup_validation, auth_controller.sign_up);
+router.post(
+  "/sign_up",
+  signup_validation,
+  upload.single("file"),
+  auth_controller.sign_up
+);
 router.post("/login", login_validation, auth_controller.login);
 router.get("/refresh_token", auth_controller.refreshToken);
 router.get(

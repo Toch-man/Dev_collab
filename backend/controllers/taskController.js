@@ -265,3 +265,35 @@ exports.get_submitted_tasks = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.delete_task = async (req, res) => {
+  try {
+    const { task_id } = req.params;
+    const task = await Task.findById(task_id);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "task not found",
+      });
+    }
+
+    //notify asisgnedto  before deleting
+    send_notification({
+      sender: req.user.userId,
+      receiver: task.assignedTo,
+      type: "task",
+      message: `This task ${task.description} has been deleted `,
+    });
+
+    await Task.findByIdAndDelete(task_id);
+
+    return res.status(200).json({
+      success: true,
+      message: "task deleted",
+    });
+  } catch (err) {
+    console.error("task deletion error", error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

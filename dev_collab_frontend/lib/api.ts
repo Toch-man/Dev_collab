@@ -1,5 +1,7 @@
 // lib/api.ts
 
+import { stringify } from "querystring";
+
 const API = process.env.NEXT_PUBLIC_API_URL;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -96,6 +98,30 @@ export const create_project = async (body: {
   return data;
 };
 
+export const delete_project = async (project_id: string) => {
+  const res = await fetch(`${API}/api/project/delete_project/${project_id}`, {
+    method: "DELETE",
+    headers: auth_headers(),
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+export const remove_member = async (
+  project_id: string,
+  member_id: { member_id: string }
+) => {
+  const res = await fetch(`${API}/api/project/remove_member/${project_id}`, {
+    method: "POST",
+    headers: auth_headers(),
+    credentials: "include",
+    body: stringify(member_id),
+  });
+
+  return res.json();
+};
+
 export const send_invite = async (project_id: string, receiver_id: string) => {
   const res = await fetch(`${API}/api/project/send_invite/${project_id}`, {
     method: "POST",
@@ -147,6 +173,7 @@ export const sign_up = async (body: {
   niche: string;
   bio: string;
   skills: string[];
+  avatar: string;
 }) => {
   const res = await fetch(`${API}/api/auth/sign_up`, {
     method: "POST",
@@ -218,6 +245,15 @@ export const submit_task = async (task_id: string, file: File) => {
 };
 export const get_submitted_task = async (project_id: string) => {
   const res = await fetch(`${API}/api/tasks/get_submitted_task/${project_id}`);
+  return res.json();
+};
+
+export const delete_task = async (task_id: string) => {
+  const res = await fetch(`${API}/api/task/delete_task/${task_id}`, {
+    method: "DELETE",
+    headers: auth_headers(),
+    credentials: "include",
+  });
   return res.json();
 };
 

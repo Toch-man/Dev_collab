@@ -40,4 +40,10 @@ router.post(
   verify_token,
   task_controller.get_single_task
 );
+router.delete(
+  "/delete_task/:task_id",
+  verify_token,
+  is_project_owner,
+  task_controller.delete_task
+);
 module.exports = router;

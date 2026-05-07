@@ -168,7 +168,7 @@ export default function UsersComponents() {
   // Client-side text search on top of backend niche filter
   const filtered = users.filter(
     (u) =>
-      u._id?.toLowerCase().includes(search.toLowerCase()) ||
+      u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       u.username?.toLowerCase().includes(search.toLowerCase()) ||
       u.niche?.toLowerCase().includes(search.toLowerCase()) ||
       u.skills?.some((s) => s.toLowerCase().includes(search.toLowerCase()))

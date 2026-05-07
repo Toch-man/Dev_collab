@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { sign_up } from "@/lib/api";
 import Link from "next/link";
@@ -53,6 +53,21 @@ const XIcon = () => (
   </svg>
 );
 
+const CameraIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-4 h-4"
+  >
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+);
+
 type FormState = {
   full_name: string;
   username: string;
@@ -76,6 +91,12 @@ const SignUp = () => {
   const [skill_input, set_skill_input] = useState("");
   const [loading, set_loading] = useState(false);
   const [error, set_error] = useState("");
+
+  // Profile picture state
+  const [avatar_file, set_avatar_file] = useState<File | null>(null);
+  const [avatar_preview, set_avatar_preview] = useState<string>("");
+  const avatar_input_ref = useRef<HTMLInputElement>(null);
+
   const router = useRouter();
 
   const handle_change = (
@@ -85,6 +106,37 @@ const SignUp = () => {
   ) => {
     set_error("");
     set_form({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handle_avatar_change = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      set_error("Please select a valid image file.");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      set_error("Image must be smaller than 5MB.");
+      return;
+    }
+
+    set_avatar_file(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      set_avatar_preview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    set_error("");
+  };
+
+  const remove_avatar = () => {
+    set_avatar_file(null);
+    set_avatar_preview("");
+    if (avatar_input_ref.current) avatar_input_ref.current.value = "";
   };
 
   const add_skill = () => {
@@ -97,7 +149,6 @@ const SignUp = () => {
     set_skill_input("");
   };
 
-  // user presses Enter or comma to add a skill tag
   const handle_skill_keydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
@@ -114,7 +165,23 @@ const SignUp = () => {
     set_loading(true);
     set_error("");
     try {
-      const data = await sign_up(form);
+      // Build FormData so we can include the avatar file
+      const form_data = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((v) => form_data.append(key, v));
+        } else {
+          form_data.append(key, value);
+        }
+      });
+      if (avatar_file) {
+        form_data.append("avatar", avatar_file);
+      }
+
+      // sign_up should accept FormData — update your api.ts accordingly.
+      // If your current sign_up only accepts JSON, pass form_data or
+      // adjust the call below to match your API's expected signature.
+      const data = await sign_up(form_data as any);
 
       if (data.success) {
         router.push("/auth/login");
@@ -125,7 +192,7 @@ const SignUp = () => {
       set_error("Something went wrong. Please try again.");
     } finally {
       set_loading(false);
-    }
+    }handle_google;
   };
 
   const handle_google = () => {
@@ -208,11 +275,90 @@ const SignUp = () => {
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
-            {error}
-          </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handle_submit} className="flex flex-col gap-4">
+            {/* ── Profile picture ── */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold text-gray-700">
+                Profile picture{" "}
+                <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+
+              <div className="flex items-center gap-4">
+                {/* Avatar preview / placeholder */}
+                <div className="relative shrink-0">
+                  {avatar_preview ? (
+                    <img
+                      src={avatar_preview}
+                      alt="Profile preview"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-green-200"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        className="w-7 h-7"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </div>
+                  )}
+
+                  {/* Camera overlay button */}
+                  <button
+                    type="button"
+                    onClick={() => avatar_input_ref.current?.click()}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-700 hover:bg-green-800 text-white rounded-full flex items-center justify-center transition-colors duration-200 shadow-sm"
+                    aria-label="Upload profile picture"
+                  >
+                    <CameraIcon />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => avatar_input_ref.current?.click()}
+                    className="text-sm font-semibold text-green-700 hover:text-green-800 hover:underline text-left"
+                  >
+                    {avatar_preview ? "Change photo" : "Upload photo"}
+                  </button>
+                  {avatar_preview && (
+                    <button
+                      type="button"
+                      onClick={remove_avatar}
+                      className="text-xs text-red-500 hover:text-red-600 hover:underline text-left"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <p className="text-xs text-gray-400">
+                    JPG, PNG, GIF · max 5 MB
+                  </p>
+                </div>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={avatar_input_ref}
+                type="file"
+                accept="image/*"
+                onChange={handle_avatar_change}
+                className="hidden"
+                aria-label="Upload profile picture"
+              />
+            </div>
+
+            {/* ── Text fields ── */}
             {text_fields.map(({ id, label, type, placeholder }) => (
               <div key={id} className="flex flex-col gap-1.5">
                 <label
@@ -247,17 +393,18 @@ const SignUp = () => {
                 required
                 value={form.niche}
                 onChange={handle_change}
+                placeholder="e.g. Full-stack, DevOps, ML..."
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-700 focus:outline-none text-sm transition-colors duration-200 bg-white text-gray-700"
-              ></input>
+              />
             </div>
 
-            {/* skills tag input */}
+            {/* Skills tag input */}
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="skills"
                 className="text-sm font-semibold text-gray-700"
               >
-                Skills{" "}
+                Skills
               </label>
 
               {form.skills.length > 0 && (

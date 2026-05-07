@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
   {
+    avatar: { type: String, unique: true },
     full_name: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -15,7 +16,7 @@ const UserSchema = new Schema(
     refreshToken: { type: String, default: null },
     one_time_code: { type: String, default: null },
     reset_token: { type: String, default: null },
-    reset_token_expires: { type: String, default: null },
+    reset_token_expires: { type: , default: null },
     one_time_code_expires: { type: String, default: null },
   },
   { timestamps: true }

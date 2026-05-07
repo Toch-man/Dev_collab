@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import Link from "next/link";
 
 const ArrowLeft = () => (
   <svg
@@ -37,7 +36,7 @@ const Login = () => {
       if (!data.success) {
         set_login_status(false);
         set_message(data.message);
-        set_login_status(false);
+
         return;
       }
       set_login_status(true);

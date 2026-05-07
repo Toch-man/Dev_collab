@@ -15,6 +15,7 @@ passport.use(
 
         if (!user) {
           user = await User.create({
+            avatar: profile
             full_name: profile.displayName,
             username: profile.displayName.replace(/\s+/g, "_").toLowerCase(),
             email: profile.emails[0].value,
