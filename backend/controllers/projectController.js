@@ -1,9 +1,7 @@
 const Project = require("../models/project");
 const Invite = require("../models/invite");
-const cloudinary = require("../cofig/cloudinary");
 const send_notification = require("../utils/notify");
 const { validationResult } = require("express-validator");
-const send_notification = require("../utils/notify");
 
 exports.all_project = async (req, res) => {
   try {
