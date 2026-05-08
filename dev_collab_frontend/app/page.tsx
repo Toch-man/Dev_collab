@@ -143,7 +143,7 @@ const stacks = [
 
 export default function Home() {
   return (
-    <div className="bg-gray-50 min-h-screen font-sans overflow-x-hidden">
+    <div className="bg-gray-50 min-h-screen min-w-screen font-sans ">
       <Nav_bar />
 
       {/* HERO */}

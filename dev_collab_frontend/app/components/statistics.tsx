@@ -8,21 +8,28 @@ const Stats = () => {
   const [stats, set_stats] = useState({ user: 0, projects: 0, niches: 0 });
   const [loading, set_loading] = useState(false);
   useEffect(() => {
-    async () => {
-      set_loading(true);
+    const fetch_stats = async () => {
+      try {
+        set_loading(true);
 
-      const users = await get_all_users();
-      const project = await get_all_projects();
-      const unique_niche = new Set(users.users.map((u: User) => u.niche)).size;
+        const users = await get_all_users();
+        const project = await get_all_projects();
+        const unique_niche = new Set(users.users.map((u: User) => u.niche))
+          .size;
 
-      set_stats({
-        user: users.user_length,
-        projects: project.total_project,
-        niches: unique_niche,
-      });
+        set_stats({
+          user: users.user_length,
+          projects: project.total_project,
+          niches: unique_niche,
+        });
+      } catch (error) {
+        set_loading(false);
+      } finally {
+        set_loading(false);
+      }
     };
-    set_loading(false);
-  }, [stats]);
+    fetch_stats();
+  }, []);
   return (
     <div className="max-w-4xl mx-auto grid grid-cols-3 divide-x divide-gray-200">
       {[

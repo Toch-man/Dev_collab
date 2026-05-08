@@ -1,32 +1,66 @@
 "use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const Nav_bar = () => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className=" flex flex-row justify-between bg-black px-10 py-5">
-      <div className="flex flex-row  items-center gap-3">
-        <div className="flex flex-row p-3 justify-center items-center border-3 border-white">
-          <h1 className="font-extrabold text-4xl text-white">D</h1>
+    <nav className="bg-black px-5 md:px-10 py-4">
+      <div className="flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center border-2 border-white w-10 h-10">
+            <h1 className="font-extrabold text-2xl text-white">D</h1>
+          </div>
+          <p className="font-extrabold text-lg md:text-xl text-white">
+            Dev_collab
+          </p>
         </div>
-        <p className="font-extrabold text-xl text-center text-white">
-          Dev_collab
-        </p>
+
+        {/* Desktop buttons */}
+        <div className="hidden md:flex gap-4">
+          <Link href="/auth/login">
+            <button className="px-5 py-2 bg-green-700 rounded-xl text-white hover:bg-green-600 transition">
+              Log in
+            </button>
+          </Link>
+
+          <Link href="/auth/signUp">
+            <button className="px-5 py-2 bg-green-700 rounded-xl text-white hover:bg-green-600 transition">
+              Sign up
+            </button>
+          </Link>
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden text-white text-2xl"
+        >
+          ☰
+        </button>
       </div>
 
-      <div className="flex gap-5 ">
-        <Link href="/auth/login">
-          <button className="p-2 w-30 h-10 bg-green-700 rounded-2xl text-center text-white text-xl hover:bg-gray-200 hover:border-2 hover:border-green-700 transition-all duration-300">
-            Log in
-          </button>
-        </Link>
-        <Link href="/auth/signUp">
-          {" "}
-          <button className="p-2  w-30 h-10 bg-green-700 rounded-2xl text-center text-white text-xl hover:bg-gray-200 hover:border-2 hover:border-green-700 transition-all duration-300">
-            Sign up
-          </button>
-        </Link>
-      </div>
-    </div>
+      {/* Mobile dropdown */}
+      {open && (
+        <div className="flex flex-col gap-3 mt-4 md:hidden">
+          <Link href="/auth/login">
+            <button className="w-full py-2 bg-green-700 rounded-xl text-white">
+              Log in
+            </button>
+          </Link>
+
+          <Link href="/auth/signUp">
+            <button className="w-full py-2 bg-green-700 rounded-xl text-white">
+              Sign up
+            </button>
+          </Link>
+        </div>
+      )}
+    </nav>
   );
 };
+
 export default Nav_bar;
