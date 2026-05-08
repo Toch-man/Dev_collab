@@ -141,110 +141,124 @@ const stacks = [
   "Open source",
 ];
 
-export default async function Home() {
+export default function Home() {
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
+    <div className="bg-gray-50 min-h-screen font-sans overflow-x-hidden">
       <Nav_bar />
 
       {/* HERO */}
-      <section className="px-6 pt-24 pb-16 text-center max-w-3xl mx-auto">
+      <section className="px-4 sm:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 text-center max-w-3xl mx-auto">
         <span className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
           Now in beta
         </span>
-        <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-gray-900">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-gray-900">
           Build together.
           <br />
           <span className="text-green-700">Ship faster.</span>
         </h1>
-        <p className="mt-6 text-lg text-gray-500 leading-relaxed max-w-xl mx-auto">
+        <p className="mt-5 sm:mt-6 text-base sm:text-lg text-gray-500 leading-relaxed max-w-xl mx-auto px-2">
           DevCollab connects developers, designers, and creators to collaborate
           on real projects — find your team, assign tasks, and ship.
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/auth/login">
-            <button className="flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white text-base font-semibold px-8 py-3 rounded-xl transition-colors duration-200">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+          <Link href="/auth/login" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white text-sm sm:text-base font-semibold px-6 sm:px-8 py-3 rounded-xl transition-colors duration-200">
               Get started free <ArrowRight />
             </button>
           </Link>
-
-          <button className="flex items-center justify-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white text-base font-semibold px-8 py-3 rounded-xl transition-all duration-200">
-            See how it works
-          </button>
+          <Link href="/how-it-works" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white text-sm sm:text-base font-semibold px-6 sm:px-8 py-3 rounded-xl transition-all duration-200">
+              See how it works
+            </button>
+          </Link>
         </div>
       </section>
 
       {/* STATS */}
-      <section className="border-y border-gray-200 bg-white">
+      <section className="border-y border-gray-200 bg-white overflow-x-hidden">
         <Stats />
       </section>
 
       {/* FEATURES */}
-      <section className="px-6 py-20 max-w-5xl mx-auto">
-        <p className="text-green-700 text-sm font-semibold uppercase tracking-widest mb-2">
+      <section className="px-4 sm:px-6 py-14 sm:py-20 max-w-5xl mx-auto">
+        <p className="text-green-700 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2">
           Features
         </p>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
           Everything you need to collaborate
         </h2>
-        <p className="text-gray-500 text-lg max-w-xl mb-12">
+        <p className="text-gray-500 text-base sm:text-lg max-w-xl mb-10 sm:mb-12">
           From finding your first team member to shipping your product —
           DevCollab has the tools to keep you moving.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {features.map((f) => (
             <div
               key={f.title}
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
               <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-4">
                 {f.icon}
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+              <h3 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">
+                {f.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-white border-y border-gray-200 px-6 py-20">
+      <section className="bg-white border-y border-gray-200 px-4 sm:px-6 py-14 sm:py-20">
         <div className="max-w-5xl mx-auto">
-          <p className="text-green-700 text-sm font-semibold uppercase tracking-widest mb-2">
+          <p className="text-green-700 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2">
             How it works
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-10 sm:mb-12">
             From idea to team in minutes
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {steps.map((s) => (
-              <div key={s.num} className="bg-gray-50 rounded-2xl p-6">
+              <div key={s.num} className="bg-gray-50 rounded-2xl p-5 sm:p-6">
                 <p className="text-xs font-bold text-green-700 mb-3">{s.num}</p>
-                <h3 className="font-bold text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <h3 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">
+                  {s.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
                   {s.desc}
                 </p>
               </div>
             ))}
           </div>
+          <div className="mt-10 sm:mt-12 text-center">
+            <Link href="/how-it-works">
+              <button className="inline-flex items-center gap-2 border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-200">
+                Read full documentation <ArrowRight />
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* TECH STACKS */}
-      <section className="px-6 py-20 max-w-5xl mx-auto">
-        <p className="text-green-700 text-sm font-semibold uppercase tracking-widest mb-2">
+      <section className="px-4 sm:px-6 py-14 sm:py-20 max-w-5xl mx-auto">
+        <p className="text-green-700 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2">
           Tech stacks
         </p>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
           Whatever you&apos;re building
         </h2>
-        <p className="text-gray-500 text-lg mb-8">
+        <p className="text-gray-500 text-base sm:text-lg mb-6 sm:mb-8">
           DevCollab supports teams across every stack and discipline.
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {stacks.map((s) => (
             <span
               key={s}
-              className="bg-white border border-gray-200 text-gray-600 text-sm px-4 py-2 rounded-full hover:border-green-700 hover:text-green-700 transition-colors duration-200"
+              className="bg-white border border-gray-200 text-gray-600 text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:border-green-700 hover:text-green-700 transition-colors duration-200"
             >
               {s}
             </span>
@@ -252,24 +266,27 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-green-700 px-6 py-20 text-center">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
+      {/* CTA */}
+      <section className="bg-green-700 px-4 sm:px-6 py-14 sm:py-20 text-center">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-4">
           Ready to find your team?
         </h2>
-        <p className="text-green-100 text-lg mb-8 max-w-md mx-auto">
+        <p className="text-green-100 text-base sm:text-lg mb-6 sm:mb-8 max-w-md mx-auto px-4">
           Join thousands of developers already building on DevCollab.
         </p>
         <Link href="/auth/login">
-          <button className="flex items-center justify-center gap-2 mx-auto bg-white text-green-700 hover:bg-green-50 font-bold text-base px-10 py-3 rounded-xl transition-colors duration-200">
+          <button className="inline-flex items-center justify-center gap-2 bg-white text-green-700 hover:bg-green-50 font-bold text-sm sm:text-base px-8 sm:px-10 py-3 rounded-xl transition-colors duration-200">
             Start building <ArrowRight />
           </button>
         </Link>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 px-6 py-10 text-center">
-        <p className="text-2xl font-extrabold text-white mb-1">DevCollab</p>
-        <p className="text-gray-500 text-sm">
+      <footer className="bg-gray-900 px-4 sm:px-6 py-8 sm:py-10 text-center">
+        <p className="text-xl sm:text-2xl font-extrabold text-white mb-1">
+          DevCollab
+        </p>
+        <p className="text-gray-500 text-xs sm:text-sm">
           © {new Date().getFullYear()} DevCollab. Built by developers, for
           developers.
         </p>
