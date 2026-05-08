@@ -1,5 +1,5 @@
 "use client";
-
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useContext,
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathName = usePathname();
 
   useEffect(() => {
     //  async function defined AND called inside useEffect
@@ -80,11 +81,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // register logout so api.ts can trigger it on any 401
     register_logout(() => {
-      localStorage.removeItem("user");
-      localStorage.removeItem("access_token");
-      setUser(null);
-      setToken(null);
-      router.push("/auth/login");
+      const public_routes = [];
+      if (localStorage.getItem("user")) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("access_token");
+        setUser(null);
+        setToken(null);
+        router.push("/auth/login");
+      }
     });
   }, []);
 

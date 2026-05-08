@@ -1,20 +1,42 @@
 // lib/api.ts
 
-import { stringify } from "querystring";
-
 const API = process.env.NEXT_PUBLIC_API_URL;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-const get_token = () => localStorage.getItem("access_token");
 let logout_callback: (() => void) | null = null;
+
+const handle_response = async (res: Response) => {
+  if (res.status === 401) {
+    if (logout_callback) logout_callback();
+
+    throw new Error("Unauthorized");
+  }
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Request failed");
+  }
+
+  return data;
+};
+
+const get_token = () => {
+  if (typeof window === "undefined") return null;
+
+  return localStorage.getItem("access_token");
+};
 
 export const register_logout = (fn: () => void) => {
   logout_callback = fn;
 };
-const auth_headers = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${get_token()}`,
-});
+const auth_headers = (): HeadersInit => {
+  const token = get_token();
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 export const isTokenExpired = (token: string) => {
   try {
@@ -33,7 +55,7 @@ export const getRefreshToken = async () => {
     headers: auth_headers(),
     credentials: "include",
   });
-  return res.json();
+  return handle_response(res);
 };
 
 const cache: Record<string, { data: unknown; timestamp: number }> = {};
@@ -49,15 +71,7 @@ const cached_fetch = async (url: string, force = false) => {
     credentials: "include",
   });
 
-  //  auto logout on 401
-  if (res.status === 401) {
-    if (logout_callback) logout_callback();
-    throw new Error("Unauthorised — logged out");
-  }
-
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-
-  const data = await res.json();
+  const data = await handle_response(res);
   cache[url] = { data, timestamp: Date.now() };
   return data;
 };
@@ -93,7 +107,7 @@ export const create_project = async (body: {
     credentials: "include",
     body: JSON.stringify(body),
   });
-  const data = await res.json();
+  const data = await handle_response(res);
   invalidate(KEYS.projects);
   return data;
 };
@@ -105,7 +119,7 @@ export const delete_project = async (project_id: string) => {
     credentials: "include",
   });
 
-  return res.json();
+  return handle_response(res);
 };
 
 export const remove_member = async (
@@ -116,10 +130,10 @@ export const remove_member = async (
     method: "PATCH",
     headers: auth_headers(),
     credentials: "include",
-    body: stringify(member_id),
+    body: JSON.stringify(member_id),
   });
 
-  return res.json();
+  return handle_response(res);
 };
 
 export const send_invite = async (project_id: string, receiver_id: string) => {
@@ -129,7 +143,7 @@ export const send_invite = async (project_id: string, receiver_id: string) => {
     credentials: "include",
     body: JSON.stringify({ receiver_id }),
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const accept_invite = async (invite_id: string) => {
@@ -139,7 +153,7 @@ export const accept_invite = async (invite_id: string) => {
     credentials: "include",
     body: JSON.stringify({ invite_id }),
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const reject_invite = async (invite_id: string) => {
@@ -148,7 +162,7 @@ export const reject_invite = async (invite_id: string) => {
     headers: auth_headers(),
     credentials: "include",
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const get_my_invites = (force = false) =>
@@ -162,7 +176,7 @@ export const login = async (email: string, password: string) => {
     credentials: "include",
     body: JSON.stringify({ email, password }),
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const sign_up = async (body: {
@@ -181,7 +195,7 @@ export const sign_up = async (body: {
     credentials: "include",
     body: JSON.stringify(body),
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const get_all_users = async (niche?: string, project_id?: string) => {
@@ -194,7 +208,7 @@ export const get_all_users = async (niche?: string, project_id?: string) => {
     headers: auth_headers(),
     credentials: "include",
   });
-  return res.json();
+  return handle_response(res);
 };
 
 // tasks
@@ -224,7 +238,7 @@ export const update_task_data = async (
     }
   );
 
-  return res.json();
+  return handle_response(res);
 };
 export const assign_task = async (
   project_id: string,
@@ -242,7 +256,7 @@ export const assign_task = async (
     credentials: "include",
     body: JSON.stringify(body),
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const submit_task = async (task_id: string, file: File) => {
@@ -250,24 +264,24 @@ export const submit_task = async (task_id: string, file: File) => {
   form.append("file", file);
   const res = await fetch(`${API}/api/tasks/submit_task/${task_id}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${get_token()}` },
+    headers: auth_headers(),
     credentials: "include",
     body: form,
   });
-  return res.json();
+  return handle_response(res);
 };
 export const get_submitted_task = async (project_id: string) => {
   const res = await fetch(`${API}/api/tasks/get_submitted_task/${project_id}`);
-  return res.json();
+  return handle_response(res);
 };
 
 export const delete_task = async (task_id: string) => {
-  const res = await fetch(`${API}/api/task/delete_task/${task_id}`, {
+  const res = await fetch(`${API}/api/tasks/delete_task/${task_id}`, {
     method: "DELETE",
     headers: auth_headers(),
     credentials: "include",
   });
-  return res.json();
+  return handle_response(res);
 };
 
 export const get_notification = async () => {
@@ -277,16 +291,16 @@ export const get_notification = async () => {
     credentials: "include",
   });
 
-  return res.json();
+  return handle_response(res);
 };
 
 export const mark_as_read = async (notification_id: string) => {
-  const res = await fetch(`${API}/notifications/mark_as_read`, {
+  const res = await fetch(`${API}/api/notifications/mark_as_read`, {
     method: "PATCH",
     headers: auth_headers(),
     credentials: "include",
     body: JSON.stringify({ notification_id }),
   });
 
-  return res.json();
+  return handle_response(res);
 };
