@@ -287,8 +287,11 @@ exports.get_all_users = async (req, res) => {
       query,
       "full_name username email niche bio skills role"
     );
+    const user_count = await User.countDocuments();
 
-    return res.status(200).json({ success: true, users });
+    return res
+      .status(200)
+      .json({ success: true, users, user_length: user_count });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

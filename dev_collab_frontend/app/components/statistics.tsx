@@ -16,7 +16,7 @@ const Stats = () => {
       const unique_niche = new Set(users.users.map((u: User) => u.niche)).size;
 
       set_stats({
-        user: users.users.length,
+        user: users.user_count,
         projects: project.total_project,
         niches: unique_niche,
       });

@@ -33,10 +33,12 @@ exports.get_my_projects = async (req, res) => {
       .populate("members", "full_name email skills niche ")
       .sort({ createdAt: -1 });
 
+    const project_count = await Project.countDocuments();
+
     return res.status(200).json({
       success: true,
       message: "fetched all projects",
-      total_project: all_project.length,
+      total_project: project_count,
       project: all_project,
     });
   } catch (error) {
