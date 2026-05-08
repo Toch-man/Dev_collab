@@ -39,7 +39,7 @@ const Nav_bar = () => {
           onClick={() => setOpen(!open)}
           className="md:hidden text-white text-2xl"
         >
-          ☰
+          {!open ? "☰" : "X"}
         </button>
       </div>
 
