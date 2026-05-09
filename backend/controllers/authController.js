@@ -52,8 +52,6 @@ exports.sign_up = async (req, res) => {
       password: hashed_password,
     });
 
-    await new_user.save();
-
     const access_token = jwt.sign(
       {
         userId: new_user._id,
@@ -77,6 +75,7 @@ exports.sign_up = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    await new_user.save();
 
     return res.status(201).json({
       success: true,
