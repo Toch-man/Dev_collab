@@ -47,13 +47,13 @@ const Nav_bar = () => {
       {open && (
         <div className="flex flex-col gap-3 mt-4 md:hidden">
           <Link href="/auth/login">
-            <button className="w-full py-2 bg-green-700 rounded-xl text-white">
+            <button className="w-full py-2 bg-green-700 rounded-xl text-white hover:bg-green-600 transition">
               Log in
             </button>
           </Link>
 
           <Link href="/auth/signUp">
-            <button className="w-full py-2 bg-green-700 rounded-xl text-white">
+            <button className="w-full py-2 bg-green-700 rounded-xl text-white hover:bg-green-600 transition">
               Sign up
             </button>
           </Link>
