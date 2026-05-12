@@ -84,7 +84,7 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="p-6">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push("/")}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-green-700 transition-colors duration-200"
         >
           <ArrowLeft />
